@@ -10,18 +10,18 @@
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
 
   :root {
-    --color-bg: #FDF8F3;
+    --color-bg: #FFFFFF;
     --color-surface: #FFFFFF;
     --color-text: #2D1B0E;
     --color-text-secondary: #6B5240;
-    --color-primary: #B85C38;
-    --color-primary-light: #E8C5A8;
-    --color-primary-bg: #FDF2E9;
+    --color-primary: #8B6BAE;
+    --color-primary-light: #D4C4E8;
+    --color-primary-bg: #F6F2FA;
     --color-accent: #5B8A72;
     --color-accent-light: #D4E8DC;
     --color-accent-bg: #F0F7F3;
-    --color-warm: #C9A96E;
-    --color-warm-light: #F5EBD8;
+    --color-warm: #9B7EC4;
+    --color-warm-light: #F3EEF8;
     --color-tip-bg: #FFF8ED;
     --color-tip-border: #D4A853;
     --color-divider: #E8DDD0;
@@ -51,100 +51,43 @@
 
   .container {
     width: 100%;
-    max-width: 1400px;
+    max-width: none;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 16px;
   }
 
   .hidden { display: none !important; }
 
   /* ===== Reminder Card ===== */
   .reminder-card {
-    background: var(--color-surface);
+    background: linear-gradient(135deg, #EBF4FF 0%, #F5F9FF 100%);
     border-radius: var(--radius-md);
-    padding: 6px 10px;
+    padding: 20px 40px;
     box-shadow: var(--shadow-md);
-    border: 1px solid var(--color-divider);
-    flex-shrink: 0;
+    border: 2px solid #A3C9F7;
+    text-align: center;
   }
-  .reminder-header {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-bottom: 4px;
-    padding-bottom: 3px;
-    border-bottom: 2px solid var(--color-primary-light);
-  }
-  .reminder-header svg {
-    width: 14px;
-    height: 14px;
-    color: var(--color-primary);
-  }
-  .reminder-header span {
-    font-size: 17px;
+  .reminder-text {
+    font-size: 84px;
     font-weight: 700;
-    color: var(--color-primary);
+    color: #2B6CB0;
+    line-height: 1.3;
   }
-  .reminder-list {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-  }
-  .reminder-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 6px;
-    border-radius: var(--radius-sm);
-    font-size: 16px;
-    line-height: 1.4;
-    min-height: 36px;
-  }
-  .reminder-item svg {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-  }
-  .reminder-item--med {
-    background: #FFF1F0;
-    border: 1px solid #FFCCC7;
-    color: #CF1322;
-  }
-  .reminder-item--med svg { color: #CF1322; }
-  .reminder-item--move {
-    background: #F6FFED;
-    border: 1px solid #B7EB8F;
-    color: #389E0D;
-  }
-  .reminder-item--move svg { color: #389E0D; }
-  .reminder-item--eat {
-    background: #FFF7E6;
-    border: 1px solid #FFD591;
-    color: #D48806;
-  }
-  .reminder-item--eat svg { color: #D48806; }
-  .reminder-item--call {
-    background: #E6F7FF;
-    border: 1px solid #91D5FF;
-    color: #096DD9;
-  }
-  .reminder-item--call svg { color: #096DD9; }
 
   /* ===== Recipe Grid ===== */
   .recipe-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+    gap: 16px;
   }
 
   /* ===== Column Card ===== */
   .recipe-column {
     background: var(--color-surface);
     border-radius: var(--radius-md);
+    border: 2px solid var(--color-divider);
     box-shadow: var(--shadow-lg);
     overflow: hidden;
     display: flex;
@@ -283,6 +226,10 @@
     background: #EDF5F0;
     border-color: rgba(91, 138, 114, 0.2);
   }
+  #col-staple .ingredients-block {
+    background: #F3EEF8;
+    border-color: rgba(155, 126, 196, 0.2);
+  }
 
   .section-label {
     display: flex;
@@ -378,6 +325,22 @@
     flex-shrink: 0;
     margin-top: 1px;
   }
+  #col-staple .tip-block {
+    background: #F8F4FC;
+    border: 1px solid rgba(155, 126, 196, 0.25);
+    border-left: 3px solid #9B7EC4;
+  }
+  #col-staple .tip-block svg {
+    color: #9B7EC4;
+  }
+  #col-dish .tip-block {
+    background: #EDF7F2;
+    border: 1px solid rgba(91, 138, 114, 0.2);
+    border-left: 3px solid #5B8A72;
+  }
+  #col-dish .tip-block svg {
+    color: #5B8A72;
+  }
   .tip-text {
     font-size: 15px;
     color: var(--color-text-secondary);
@@ -399,28 +362,7 @@
   <!-- Reminder -->
   <div id="reminder-section" class="hidden">
     <div class="reminder-card">
-      <div class="reminder-header">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 8v4l2.5 2.5"/></svg>
-        <span>今日叮嘱</span>
-      </div>
-      <ul id="reminder-text" class="reminder-list">
-        <li class="reminder-item reminder-item--med">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>
-          早上8点按时吃药（按医嘱服用）
-        </li>
-        <li class="reminder-item reminder-item--move">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="m7 21 3-9 2.5 2 2.5-2 3 9"/><path d="M12 11V7"/></svg>
-          饭后在家慢走15分钟，扶着墙走
-        </li>
-        <li class="reminder-item reminder-item--eat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h2l3.6 7.6a2 2 0 0 0 2 1.2h6.8a2 2 0 0 0 2-1.2L20 4"/><circle cx="8" cy="20" r="2"/><circle cx="17" cy="20" r="2"/><path d="M12 11v5"/></svg>
-          午餐前喝一碗鱼汤，今天配的是鲈鱼
-        </li>
-        <li class="reminder-item reminder-item--call">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          下午有预约，在家等候即可
-        </li>
-      </ul>
+      <div id="reminder-text" class="reminder-text">冰箱有酸奶，喝！</div>
     </div>
   </div>
 
@@ -1112,12 +1054,8 @@ function swapDish() {
 }
 
 function hasReminder() {
-  var list = document.getElementById('reminder-text');
-  var items = list.querySelectorAll('.reminder-item');
-  for (var i = 0; i < items.length; i++) {
-    if (items[i].textContent.trim().length > 0) return true;
-  }
-  return false;
+  var el = document.getElementById('reminder-text');
+  return el && el.textContent.trim().length > 0;
 }
 
 function init() {

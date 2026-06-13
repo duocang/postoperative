@@ -1,0 +1,6 @@
+.superpowers/
+.mimocode/
+.playwright-mcp/
+.DS_Store
+*.docx
+docs/superpowers/

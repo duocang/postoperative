@@ -83,6 +83,16 @@
     margin-top: 8px;
   }
 
+  /* ===== Meal Indicator ===== */
+  .meal-indicator {
+    text-align: center;
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--color-primary);
+    padding: 2px 0 0;
+    line-height: 1.3;
+  }
+
   /* ===== Recipe Grid ===== */
   .recipe-grid {
     display: grid;
@@ -373,6 +383,9 @@
       <div id="reminder-sub" class="reminder-sub">冰柜南瓜泥切小块，装袋放冰柜</div>
     </div>
   </div>
+
+  <!-- Meal Indicator -->
+  <div id="meal-indicator" class="meal-indicator"></div>
 
   <!-- Recipes -->
   <div id="recipe-section">
@@ -1024,6 +1037,29 @@ var stapleSwapHistory = [];
 var dishSwapHistory = [];
 var stapleToday = -1;
 var dishToday = -1;
+var currentMeal = '';
+
+function getMeal(recipe) {
+  var n = recipe.name;
+  if (recipe.category === '主食') {
+    if (/粥|糊|羹|粉/.test(n)) return '早/晚';
+    return '午/晚';
+  }
+  if (/蛋羹|蒸蛋|豆腐/.test(n)) return '早/午/晚';
+  if (/汤/.test(n)) return '午/晚';
+  return '午/晚';
+}
+
+function getCurrentMeal() {
+  var h = new Date().getHours();
+  if (h >= 5 && h < 10) return '早';
+  if (h >= 10 && h < 14) return '午';
+  return '晚';
+}
+
+function filterByMeal(list) {
+  return list.filter(function(r) { return getMeal(r).indexOf(currentMeal) !== -1; });
+}
 
 function renderColumn(prefix, recipe) {
   var nameEl = document.getElementById(prefix + '-name');
@@ -1103,8 +1139,9 @@ function swapOne(list, history, todayIdx) {
 }
 
 function swapStaple() {
-  stapleToday = stapleToday === -1 ? getTodayIndex(staples) : stapleToday;
-  var s = swapOne(staples, stapleSwapHistory, stapleToday);
+  var avail = filterByMeal(staples);
+  stapleToday = stapleToday === -1 ? getTodayIndex(avail) : stapleToday;
+  var s = swapOne(avail, stapleSwapHistory, stapleToday);
   if (!s) {
     document.querySelector('#col-staple .btn-swap').disabled = true;
     document.querySelector('#col-staple .btn-swap').textContent = '已全部';
@@ -1114,8 +1151,9 @@ function swapStaple() {
 }
 
 function swapDish() {
-  dishToday = dishToday === -1 ? getTodayIndex(dishes) : dishToday;
-  var d = swapOne(dishes, dishSwapHistory, dishToday);
+  var avail = filterByMeal(dishes);
+  dishToday = dishToday === -1 ? getTodayIndex(avail) : dishToday;
+  var d = swapOne(avail, dishSwapHistory, dishToday);
   if (!d) {
     document.querySelector('#col-dish .btn-swap').disabled = true;
     document.querySelector('#col-dish .btn-swap').textContent = '已全部';
@@ -1130,20 +1168,30 @@ function hasReminder() {
 }
 
 function init() {
-  stapleToday = getTodayIndex(staples);
-  dishToday = getTodayIndex(dishes);
+  currentMeal = getCurrentMeal();
+  var mealLabels = { '早': '早餐', '午': '午餐', '晚': '晚餐' };
+  var labelEl = document.getElementById('meal-indicator');
+  if (labelEl) labelEl.textContent = '今日' + mealLabels[currentMeal];
+
+  var availStaples = filterByMeal(staples);
+  var availDishes = filterByMeal(dishes);
+  stapleSwapHistory = [];
+  dishSwapHistory = [];
+
+  stapleToday = getTodayIndex(availStaples);
+  dishToday = getTodayIndex(availDishes);
 
   if (hasReminder()) {
     document.getElementById('reminder-section').classList.remove('hidden');
     document.getElementById('recipe-section').classList.remove('hidden');
-    renderColumn('staple', getToday(staples));
-    renderColumn('dish', getToday(dishes));
+    renderColumn('staple', getToday(availStaples));
+    renderColumn('dish', getToday(availDishes));
     document.title = '今日叮嘱';
   } else {
     document.getElementById('reminder-section').classList.add('hidden');
     document.getElementById('recipe-section').classList.remove('hidden');
-    renderColumn('staple', getToday(staples));
-    renderColumn('dish', getToday(dishes));
+    renderColumn('staple', getToday(availStaples));
+    renderColumn('dish', getToday(availDishes));
     stapleSwapHistory.push(stapleToday);
     dishSwapHistory.push(dishToday);
   }

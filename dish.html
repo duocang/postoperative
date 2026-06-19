@@ -64,23 +64,260 @@
   .reminder-card {
     background: linear-gradient(135deg, #EBF4FF 0%, #F5F9FF 100%);
     border-radius: var(--radius-md);
-    padding: 0 40px;
+    padding: 6px 20px;
     box-shadow: var(--shadow-md);
     border: 2px solid #A3C9F7;
     text-align: center;
   }
   .reminder-text {
-    font-size: 80px;
+    font-size: 28px;
     font-weight: 700;
     color: #2B6CB0;
-    line-height: 1.1;
+    line-height: 1.3;
   }
   .reminder-sub {
-    font-size: 80px;
+    font-size: 22px;
     font-weight: 500;
     color: #4A8BC2;
-    line-height: 1.2;
-    margin-top: 8px;
+    line-height: 1.3;
+    margin-top: 4px;
+  }
+
+  /* ===== Diet Note ===== */
+  .diet-note {
+    background: linear-gradient(135deg, #FFF5F5 0%, #FFF0F0 100%);
+    border: 1px solid #F5C6CB;
+    border-radius: var(--radius-sm);
+    padding: 4px 14px;
+    font-size: 15px;
+    color: #A94442;
+    text-align: center;
+    font-weight: 500;
+    letter-spacing: 1px;
+  }
+
+  /* ===== Meal Rows ===== */
+  .meals-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .meal-row {
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    border: 2px solid var(--color-divider);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .meal-row.current {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+  }
+
+  .meal-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-bottom: 1px solid var(--color-divider);
+    background: #FAFAF7;
+  }
+  .meal-row.current .meal-header {
+    background: var(--color-primary-bg);
+    border-bottom-color: var(--color-primary-light);
+  }
+
+  .meal-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .meal-label {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-text);
+    flex: 1;
+  }
+
+  .meal-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .btn-meal-swap {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px 10px;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 600;
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .btn-meal-swap:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-bg);
+  }
+  .btn-meal-swap:active { transform: scale(0.96); }
+  .btn-meal-swap:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  .meal-compact {
+    padding: 6px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .meal-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 17px;
+    line-height: 1.4;
+  }
+
+  .item-cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 100px;
+    flex-shrink: 0;
+  }
+  .item-cat.staple { background: var(--color-primary); color: #fff; }
+  .item-cat.dish   { background: var(--color-accent); color: #fff; }
+
+  .item-name {
+    font-weight: 700;
+    color: var(--color-text);
+    flex-shrink: 0;
+  }
+
+  .item-meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--color-text-secondary);
+    flex-wrap: wrap;
+    font-size: 14px;
+  }
+  .item-meta .sep { color: var(--color-divider); }
+
+  /* Expand Toggle */
+  .expand-toggle {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 4px;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 500;
+    color: var(--color-primary);
+    background: none;
+    border: none;
+    border-top: 1px dashed var(--color-divider);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .expand-toggle:hover { background: var(--color-primary-bg); }
+
+  /* Detail Section */
+  .meal-detail {
+    border-top: 1px solid var(--color-divider);
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .detail-card {
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+    border: 1px solid var(--color-divider);
+  }
+  .detail-card.staple-card {
+    background: #F3EEF8;
+    border-color: rgba(155, 126, 196, 0.2);
+  }
+  .detail-card.dish-card {
+    background: #EDF5F0;
+    border-color: rgba(91, 138, 114, 0.2);
+  }
+
+  .detail-card .detail-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 3px;
+  }
+  .detail-card .detail-ingredients {
+    font-size: 15px;
+    color: var(--color-text);
+    margin-bottom: 4px;
+    line-height: 1.5;
+  }
+  .detail-card .detail-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .detail-card .detail-steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+    padding: 2px 0;
+    font-size: 15px;
+    color: var(--color-text);
+    line-height: 1.5;
+  }
+  .detail-card .detail-steps li + li {
+    border-top: 1px dashed var(--color-divider);
+  }
+  .detail-card .detail-step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .detail-card.staple-card .detail-step-num { background: var(--color-primary); color: #fff; }
+  .detail-card.dish-card .detail-step-num { background: var(--color-accent); color: #fff; }
+
+  .detail-card .detail-tip {
+    margin-top: 4px;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    padding: 3px 6px;
+    border-radius: var(--radius-sm);
+    line-height: 1.4;
+  }
+  .detail-card.staple-card .detail-tip {
+    background: #F8F4FC;
+    border-left: 3px solid #9B7EC4;
+  }
+  .detail-card.dish-card .detail-tip {
+    background: #EDF7F2;
+    border-left: 3px solid #5B8A72;
   }
 
   /* ===== Meal Indicator ===== */
@@ -414,119 +651,51 @@
     </div>
   </div>
 
-  <!-- Meal Indicator -->
-  <div id="meal-indicator" class="meal-indicator"></div>
+  <!-- Diet Note -->
+  <div class="diet-note">🥄 胰腺友好：低脂少油 · 少食多餐 · 晚餐清淡 · 趁热吃</div>
 
-  <!-- Recipes -->
-  <div id="recipe-section">
-    <div class="recipe-grid">
-
-      <!-- Staple -->
-      <div class="recipe-column" id="col-staple">
-        <div class="col-header">
-          <span class="col-badge">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 12 2.1 6.3"/></svg>
-            主食
-          </span>
-          <div id="staple-name" class="col-name"></div>
-          <button class="btn-swap" onclick="swapStaple()" aria-label="换一道主食">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-            换一道
-          </button>
-        </div>
-        <div class="meta-row">
-          <span class="meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span id="staple-time"></span>
-          </span>
-          <span class="meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            <span id="staple-steps"></span>
-          </span>
-          <span class="meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/><path d="M12 6v6l4 2"/></svg>
-            <span id="staple-method"></span>
-          </span>
-        </div>
-        <div class="tag-row">
-          <span id="staple-difficulty" class="difficulty-stars"></span>
-          <span id="staple-nutrition"></span>
-        </div>
-        <div class="col-body">
-          <div class="section-block ingredients-block">
-            <div class="section-label">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-              食材
-            </div>
-            <div id="staple-ingredients" class="ingredients-text"></div>
-          </div>
-          <div class="section-block instructions-block">
-            <div class="section-label">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-              做法
-            </div>
-            <ol id="staple-instructions" class="instructions-list"></ol>
-          </div>
-          <div id="staple-tip" class="section-block tip-block hidden">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            <span id="staple-tip-text" class="tip-text"></span>
-          </div>
+  <!-- Meals -->
+  <div class="meals-section">
+    <div class="meal-row" data-meal="早">
+      <div class="meal-header">
+        <span class="meal-icon">🥣</span>
+        <span class="meal-label">早餐</span>
+        <div class="meal-actions">
+          <button class="btn-meal-swap" onclick="swapMeal('早','staple')">换主食</button>
+          <button class="btn-meal-swap" onclick="swapMeal('早','dish')">换菜品</button>
         </div>
       </div>
+      <div class="meal-compact" id="compact-早"></div>
+      <button class="expand-toggle" id="toggle-早" onclick="toggleMeal('早')">▾ 查看做法</button>
+      <div class="meal-detail hidden" id="detail-早"></div>
+    </div>
 
-      <!-- Dish -->
-      <div class="recipe-column" id="col-dish">
-        <div class="col-header">
-          <span class="col-badge">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/><path d="M12 12 2.1 6.3"/></svg>
-            菜品
-          </span>
-          <div id="dish-name" class="col-name"></div>
-          <button class="btn-swap" onclick="swapDish()" aria-label="换一道菜">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-            换一道
-          </button>
-        </div>
-        <div class="meta-row">
-          <span class="meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span id="dish-time"></span>
-          </span>
-          <span class="meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            <span id="dish-steps"></span>
-          </span>
-          <span class="meta-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/><path d="M12 6v6l4 2"/></svg>
-            <span id="dish-method"></span>
-          </span>
-        </div>
-        <div class="tag-row">
-          <span id="dish-difficulty" class="difficulty-stars"></span>
-          <span id="dish-nutrition"></span>
-        </div>
-        <div class="col-body">
-          <div class="section-block ingredients-block">
-            <div class="section-label">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-              食材
-            </div>
-            <div id="dish-ingredients" class="ingredients-text"></div>
-          </div>
-          <div class="section-block instructions-block">
-            <div class="section-label">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-              做法
-            </div>
-            <ol id="dish-instructions" class="instructions-list"></ol>
-          </div>
-          <div id="dish-tip" class="section-block tip-block hidden">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-            <span id="dish-tip-text" class="tip-text"></span>
-          </div>
+    <div class="meal-row" data-meal="午">
+      <div class="meal-header">
+        <span class="meal-icon">🍚</span>
+        <span class="meal-label">午餐</span>
+        <div class="meal-actions">
+          <button class="btn-meal-swap" onclick="swapMeal('午','staple')">换主食</button>
+          <button class="btn-meal-swap" onclick="swapMeal('午','dish')">换菜品</button>
         </div>
       </div>
+      <div class="meal-compact" id="compact-午"></div>
+      <button class="expand-toggle" id="toggle-午" onclick="toggleMeal('午')">▾ 查看做法</button>
+      <div class="meal-detail hidden" id="detail-午"></div>
+    </div>
 
+    <div class="meal-row" data-meal="晚">
+      <div class="meal-header">
+        <span class="meal-icon">🌙</span>
+        <span class="meal-label">晚餐</span>
+        <div class="meal-actions">
+          <button class="btn-meal-swap" onclick="swapMeal('晚','staple')">换主食</button>
+          <button class="btn-meal-swap" onclick="swapMeal('晚','dish')">换菜品</button>
+        </div>
+      </div>
+      <div class="meal-compact" id="compact-晚"></div>
+      <button class="expand-toggle" id="toggle-晚" onclick="toggleMeal('晚')">▾ 查看做法</button>
+      <div class="meal-detail hidden" id="detail-晚"></div>
     </div>
   </div>
 
@@ -1069,36 +1238,29 @@ var recipes = [
   }
 ];
 
+
 var staples = recipes.filter(function(r) { return r.category === '主食'; });
 var dishes = recipes.filter(function(r) { return r.category === '菜'; });
-var stapleSwapHistory = [];
-var dishSwapHistory = [];
-var stapleToday = -1;
-var dishToday = -1;
-var currentMeal = '';
-var currentStaple = null;
-var currentDish = null;
+
+var mealState = {
+  '早': { stapleIdx: -1, dishIdx: -1, stapleHistory: [], dishHistory: [] },
+  '午': { stapleIdx: -1, dishIdx: -1, stapleHistory: [], dishHistory: [] },
+  '晚': { stapleIdx: -1, dishIdx: -1, stapleHistory: [], dishHistory: [] }
+};
 
 function getMeal(recipe) {
   var n = recipe.name;
   if (recipe.category === '主食') {
-    if (/粥|糊|羹|粉/.test(n)) return '早/晚';
-    return '午/晚';
+    if (/粥|糊|羹|粉/.test(n)) return ['早','晚'];
+    return ['午','晚'];
   }
-  if (/蛋羹|蒸蛋|豆腐/.test(n)) return '早/午/晚';
-  if (/汤/.test(n)) return '午/晚';
-  return '午/晚';
+  if (/蛋羹|蒸蛋|豆腐/.test(n)) return ['早','午','晚'];
+  if (/汤/.test(n)) return ['午','晚'];
+  return ['午','晚'];
 }
 
-function getCurrentMeal() {
-  var h = new Date().getHours();
-  if (h >= 5 && h < 10) return '早';
-  if (h >= 10 && h < 14) return '午';
-  return '晚';
-}
-
-function filterByMeal(list) {
-  return list.filter(function(r) { return getMeal(r).indexOf(currentMeal) !== -1; });
+function filterForMeal(list, meal) {
+  return list.filter(function(r) { return getMeal(r).indexOf(meal) !== -1; });
 }
 
 var INGREDIENT_MAP = {
@@ -1128,11 +1290,11 @@ function getKeyIngredients(recipe) {
   return keys;
 }
 
-function hasConflict(staple, dish) {
-  var sKeys = getKeyIngredients(staple);
-  var dKeys = getKeyIngredients(dish);
-  for (var i = 0; i < sKeys.length; i++) {
-    if (dKeys.indexOf(sKeys[i]) !== -1) return true;
+function hasConflict(a, b) {
+  var aKeys = getKeyIngredients(a);
+  var bKeys = getKeyIngredients(b);
+  for (var i = 0; i < aKeys.length; i++) {
+    if (bKeys.indexOf(aKeys[i]) !== -1) return true;
   }
   return false;
 }
@@ -1141,94 +1303,15 @@ function findCompatiblePair(stapleList, dishList, sIdx, dIdx) {
   var staple = stapleList[sIdx];
   var dish = dishList[dIdx];
   if (!hasConflict(staple, dish)) return { staple: staple, dish: dish, sIdx: sIdx, dIdx: dIdx };
-
-  // Try swapping dish first
   for (var i = 0; i < dishList.length; i++) {
-    if (i !== dIdx && !hasConflict(staple, dishList[i])) {
+    if (i !== dIdx && !hasConflict(staple, dishList[i]))
       return { staple: staple, dish: dishList[i], sIdx: sIdx, dIdx: i };
-    }
   }
-  // Try swapping staple
   for (var j = 0; j < stapleList.length; j++) {
-    if (j !== sIdx && !hasConflict(stapleList[j], dish)) {
+    if (j !== sIdx && !hasConflict(stapleList[j], dish))
       return { staple: stapleList[j], dish: dish, sIdx: j, dIdx: dIdx };
-    }
   }
-  // Fallback: original pair (rare conflict unavoidable)
   return { staple: staple, dish: dish, sIdx: sIdx, dIdx: dIdx };
-}
-
-function renderColumn(prefix, recipe) {
-  var nameEl = document.getElementById(prefix + '-name');
-  var timeEl = document.getElementById(prefix + '-time');
-  var stepsEl = document.getElementById(prefix + '-steps');
-  var methodEl = document.getElementById(prefix + '-method');
-  var ingEl = document.getElementById(prefix + '-ingredients');
-  var instrEl = document.getElementById(prefix + '-instructions');
-  var tipEl = document.getElementById(prefix + '-tip');
-  var tipTextEl = document.getElementById(prefix + '-tip-text');
-  var diffEl = document.getElementById(prefix + '-difficulty');
-  var nutEl = document.getElementById(prefix + '-nutrition');
-
-  if (!recipe) {
-    nameEl.textContent = '暂无';
-    timeEl.textContent = '--';
-    stepsEl.textContent = '--';
-    methodEl.textContent = '--';
-    ingEl.textContent = '';
-    instrEl.innerHTML = '';
-    tipEl.classList.add('hidden');
-    if (diffEl) diffEl.textContent = '';
-    if (nutEl) nutEl.innerHTML = '';
-    return;
-  }
-
-  nameEl.textContent = recipe.name;
-  timeEl.textContent = recipe.time;
-  stepsEl.textContent = recipe.steps + '步';
-  methodEl.textContent = recipe.method;
-
-  ingEl.innerHTML = recipe.ingredients.map(function(ing) {
-    return '<span class="ingredient-tag">' + ing + '</span>';
-  }).join('');
-
-  instrEl.innerHTML = '';
-  for (var i = 0; i < recipe.instructions.length; i++) {
-    var li = document.createElement('li');
-    var numSpan = document.createElement('span');
-    numSpan.className = 'step-num';
-    numSpan.textContent = i + 1;
-    var textSpan = document.createElement('span');
-    textSpan.className = 'step-text';
-    textSpan.textContent = recipe.instructions[i];
-    li.appendChild(numSpan);
-    li.appendChild(textSpan);
-    instrEl.appendChild(li);
-  }
-
-  if (recipe.tip) {
-    tipTextEl.textContent = recipe.tip;
-    tipEl.classList.remove('hidden');
-  } else {
-    tipTextEl.textContent = '';
-    tipEl.classList.add('hidden');
-  }
-
-  // Difficulty stars
-  var stars = getDifficulty(recipe);
-  if (diffEl) diffEl.textContent = stars;
-
-  // Nutrition tags
-  var tags = getNutritionTags(recipe);
-  if (nutEl) {
-    nutEl.innerHTML = '';
-    for (var t = 0; t < tags.length; t++) {
-      var span = document.createElement('span');
-      span.className = 'nutrition-tag ' + tags[t].cls;
-      span.textContent = tags[t].label;
-      nutEl.appendChild(span);
-    }
-  }
 }
 
 function getDifficulty(recipe) {
@@ -1247,51 +1330,7 @@ function getNutritionTags(recipe) {
   if (/西兰花|花菜|菠菜|白菜|青菜|秋葵|胡萝卜|芹菜|茼蒿|金针菇|平菇|香菇|南瓜/.test(n)) tags.push({ cls: 'fiber', label: '高纤维' });
   if (/豆腐|虾|排骨|鲫鱼|银耳/.test(n)) tags.push({ cls: 'calcium', label: '补钙' });
   if (/牛肉|猪里脊|鸡胸|鲈鱼|蛋白|蒸/.test(n) && !/排骨/.test(n) && !/五花/.test(ing)) tags.push({ cls: 'lowfat', label: '低脂' });
-  return tags.slice(0, 3); // max 3 tags
-}
-
-function getToday(list) {
-  var now = new Date();
-  var start = new Date(now.getFullYear(), 0, 0);
-  var dayOfYear = Math.floor((now - start) / 86400000);
-  return list[dayOfYear % list.length];
-}
-
-function getTodayIndex(list) {
-  var now = new Date();
-  var start = new Date(now.getFullYear(), 0, 0);
-  var dayOfYear = Math.floor((now - start) / 86400000);
-  return dayOfYear % list.length;
-}
-
-function swapStaple() {
-  var avail = filterByMeal(staples);
-  stapleToday = stapleToday === -1 ? getTodayIndex(avail) : stapleToday;
-  var s = trySwap(avail, stapleSwapHistory, stapleToday, currentDish);
-  if (!s) {
-    document.querySelector('#col-staple .btn-swap').disabled = true;
-    document.querySelector('#col-staple .btn-swap').textContent = '已全部';
-    return;
-  }
-  stapleSwapHistory.push(s.idx);
-  stapleToday = s.idx;
-  currentStaple = s.recipe;
-  renderColumn('staple', s.recipe);
-}
-
-function swapDish() {
-  var avail = filterByMeal(dishes);
-  dishToday = dishToday === -1 ? getTodayIndex(avail) : dishToday;
-  var d = trySwap(avail, dishSwapHistory, dishToday, currentStaple);
-  if (!d) {
-    document.querySelector('#col-dish .btn-swap').disabled = true;
-    document.querySelector('#col-dish .btn-swap').textContent = '已全部';
-    return;
-  }
-  dishSwapHistory.push(d.idx);
-  dishToday = d.idx;
-  currentDish = d.recipe;
-  renderColumn('dish', d.recipe);
+  return tags.slice(0, 3);
 }
 
 function trySwap(list, history, todayIdx, otherRecipe) {
@@ -1305,47 +1344,157 @@ function trySwap(list, history, todayIdx, otherRecipe) {
   return { idx: idx, recipe: list[idx] };
 }
 
+function getTodayIndex(list) {
+  var now = new Date();
+  var start = new Date(now.getFullYear(), 0, 0);
+  var dayOfYear = Math.floor((now - start) / 86400000);
+  return dayOfYear % list.length;
+}
+
+function renderCompact(meal, staple, dish) {
+  var el = document.getElementById('compact-' + meal);
+  if (!el) return;
+  var sStars = getDifficulty(staple);
+  var sTagStr = getNutritionTags(staple).map(function(t) { return t.label; }).join(' · ');
+  var dStars = getDifficulty(dish);
+  var dTagStr = getNutritionTags(dish).map(function(t) { return t.label; }).join(' · ');
+  el.innerHTML =
+    '<div class="meal-item">' +
+      '<span class="item-cat staple">主食</span>' +
+      '<span class="item-name">' + staple.name + '</span>' +
+      '<span class="item-meta">' +
+        staple.time + ' <span class="sep">·</span> ' + staple.steps + '步 <span class="sep">·</span> ' +
+        staple.method + ' <span class="sep">·</span> ' +
+        '<span style="font-size:13px">' + sStars + '</span>' +
+        (sTagStr ? ' <span class="sep">·</span> ' + sTagStr : '') +
+      '</span>' +
+    '</div>' +
+    '<div class="meal-item">' +
+      '<span class="item-cat dish">菜品</span>' +
+      '<span class="item-name">' + dish.name + '</span>' +
+      '<span class="item-meta">' +
+        dish.time + ' <span class="sep">·</span> ' + dish.steps + '步 <span class="sep">·</span> ' +
+        dish.method + ' <span class="sep">·</span> ' +
+        '<span style="font-size:13px">' + dStars + '</span>' +
+        (dTagStr ? ' <span class="sep">·</span> ' + dTagStr : '') +
+      '</span>' +
+    '</div>';
+}
+
+function renderDetail(meal, staple, dish) {
+  var el = document.getElementById('detail-' + meal);
+  if (!el) return;
+  var html = '';
+  [['staple-card', staple, '🥄'], ['dish-card', dish, '🍽️']].forEach(function(item) {
+    var cls = item[0], r = item[1], icon = item[2];
+    html += '<div class="detail-card ' + cls + '">';
+    html += '<div class="detail-title">' + icon + ' ' + r.name + '</div>';
+    html += '<div class="detail-ingredients">';
+    for (var i = 0; i < r.ingredients.length; i++) {
+      html += '<span class="ingredient-tag">' + r.ingredients[i] + '</span> ';
+    }
+    html += '</div><ol class="detail-steps">';
+    for (var j = 0; j < r.instructions.length; j++) {
+      html += '<li><span class="detail-step-num">' + (j+1) + '</span>' + r.instructions[j] + '</li>';
+    }
+    html += '</ol>';
+    if (r.tip) html += '<div class="detail-tip">💡 ' + r.tip + '</div>';
+    html += '</div>';
+  });
+  el.innerHTML = html;
+}
+
+function toggleMeal(meal) {
+  var detail = document.getElementById('detail-' + meal);
+  var toggle = document.getElementById('toggle-' + meal);
+  if (!detail || !toggle) return;
+  if (detail.classList.contains('hidden')) {
+    var state = mealState[meal];
+    if (!detail.innerHTML.trim()) renderDetail(meal, state.staple, state.dish);
+    detail.classList.remove('hidden');
+    toggle.textContent = '▴ 收起做法';
+  } else {
+    detail.classList.add('hidden');
+    toggle.textContent = '▾ 查看做法';
+  }
+}
+
+function swapMeal(meal, type) {
+  var state = mealState[meal];
+  var avail = filterForMeal(type === 'staple' ? staples : dishes, meal);
+  var history = type === 'staple' ? state.stapleHistory : state.dishHistory;
+  var todayIdx = type === 'staple' ? state.stapleIdx : state.dishIdx;
+  var otherRecipe = type === 'staple' ? state.dish : state.staple;
+  var result = trySwap(avail, history, todayIdx, otherRecipe);
+
+  if (!result) {
+    var row = document.querySelector('.meal-row[data-meal="' + meal + '"]');
+    if (row) {
+      var btns = row.querySelectorAll('.btn-meal-swap');
+      for (var b = 0; b < btns.length; b++) {
+        if (btns[b].textContent.indexOf(type === 'staple' ? '主食' : '菜品') !== -1) {
+          btns[b].disabled = true; btns[b].textContent = '已全部';
+        }
+      }
+    }
+    return;
+  }
+
+  history.push(result.idx);
+  if (type === 'staple') { state.stapleIdx = result.idx; state.staple = result.recipe; }
+  else { state.dishIdx = result.idx; state.dish = result.recipe; }
+  renderCompact(meal, state.staple, state.dish);
+  var detail = document.getElementById('detail-' + meal);
+  if (detail && !detail.classList.contains('hidden')) renderDetail(meal, state.staple, state.dish);
+}
+
 function hasReminder() {
   var el = document.getElementById('reminder-text');
   return el && el.textContent.trim().length > 0;
 }
 
+function getCurrentMeal() {
+  var h = new Date().getHours();
+  if (h >= 5 && h < 10) return '早';
+  if (h >= 10 && h < 14) return '午';
+  return '晚';
+}
+
 function init() {
-  currentMeal = getCurrentMeal();
-  var mealLabels = { '早': '早餐', '午': '午餐', '晚': '晚餐' };
-  var labelEl = document.getElementById('meal-indicator');
-  if (labelEl) labelEl.textContent = '今日' + mealLabels[currentMeal];
-
-  var availStaples = filterByMeal(staples);
-  var availDishes = filterByMeal(dishes);
-  stapleSwapHistory = [];
-  dishSwapHistory = [];
-
-  stapleToday = getTodayIndex(availStaples);
-  dishToday = getTodayIndex(availDishes);
-  var pair = findCompatiblePair(availStaples, availDishes, stapleToday, dishToday);
-  stapleToday = pair.sIdx;
-  dishToday = pair.dIdx;
-  currentStaple = pair.staple;
-  currentDish = pair.dish;
-
   if (hasReminder()) {
     document.getElementById('reminder-section').classList.remove('hidden');
-    document.getElementById('recipe-section').classList.remove('hidden');
-    renderColumn('staple', pair.staple);
-    renderColumn('dish', pair.dish);
     document.title = '今日叮嘱';
   } else {
     document.getElementById('reminder-section').classList.add('hidden');
-    document.getElementById('recipe-section').classList.remove('hidden');
-    renderColumn('staple', pair.staple);
-    renderColumn('dish', pair.dish);
-    stapleSwapHistory.push(stapleToday);
-    dishSwapHistory.push(dishToday);
+  }
+
+  var meals = ['早', '午', '晚'];
+  var currentMeal = getCurrentMeal();
+
+  for (var m = 0; m < meals.length; m++) {
+    var meal = meals[m];
+    var availStaples = filterForMeal(staples, meal);
+    var availDishes = filterForMeal(dishes, meal);
+    var sIdx = getTodayIndex(availStaples);
+    var dIdx = getTodayIndex(availDishes);
+    var pair = findCompatiblePair(availStaples, availDishes, sIdx, dIdx);
+    var state = mealState[meal];
+    state.staple = pair.staple;
+    state.dish = pair.dish;
+    state.stapleIdx = pair.sIdx;
+    state.dishIdx = pair.dIdx;
+    state.stapleHistory = [pair.sIdx];
+    state.dishHistory = [pair.dIdx];
+    renderCompact(meal, pair.staple, pair.dish);
+    if (meal === currentMeal) {
+      var row = document.querySelector('.meal-row[data-meal="' + meal + '"]');
+      if (row) row.classList.add('current');
+    }
   }
 }
 
 window.addEventListener('DOMContentLoaded', init);
+
 </script>
 
 </body>

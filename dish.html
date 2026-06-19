@@ -1076,6 +1076,8 @@ var dishSwapHistory = [];
 var stapleToday = -1;
 var dishToday = -1;
 var currentMeal = '';
+var currentStaple = null;
+var currentDish = null;
 
 function getMeal(recipe) {
   var n = recipe.name;
@@ -1262,38 +1264,45 @@ function getTodayIndex(list) {
   return dayOfYear % list.length;
 }
 
-function swapOne(list, history, todayIdx) {
-  if (history.length >= list.length - 1) return null;
-  var idx;
-  do {
-    idx = Math.floor(Math.random() * list.length);
-  } while (idx === todayIdx || history.indexOf(idx) !== -1);
-  history.push(idx);
-  return list[idx];
-}
-
 function swapStaple() {
   var avail = filterByMeal(staples);
   stapleToday = stapleToday === -1 ? getTodayIndex(avail) : stapleToday;
-  var s = swapOne(avail, stapleSwapHistory, stapleToday);
+  var s = trySwap(avail, stapleSwapHistory, stapleToday, currentDish);
   if (!s) {
     document.querySelector('#col-staple .btn-swap').disabled = true;
     document.querySelector('#col-staple .btn-swap').textContent = '已全部';
     return;
   }
-  renderColumn('staple', s);
+  stapleSwapHistory.push(s.idx);
+  stapleToday = s.idx;
+  currentStaple = s.recipe;
+  renderColumn('staple', s.recipe);
 }
 
 function swapDish() {
   var avail = filterByMeal(dishes);
   dishToday = dishToday === -1 ? getTodayIndex(avail) : dishToday;
-  var d = swapOne(avail, dishSwapHistory, dishToday);
+  var d = trySwap(avail, dishSwapHistory, dishToday, currentStaple);
   if (!d) {
     document.querySelector('#col-dish .btn-swap').disabled = true;
     document.querySelector('#col-dish .btn-swap').textContent = '已全部';
     return;
   }
-  renderColumn('dish', d);
+  dishSwapHistory.push(d.idx);
+  dishToday = d.idx;
+  currentDish = d.recipe;
+  renderColumn('dish', d.recipe);
+}
+
+function trySwap(list, history, todayIdx, otherRecipe) {
+  if (history.length >= list.length - 1) return null;
+  var idx, attempts = 0;
+  do {
+    idx = Math.floor(Math.random() * list.length);
+    attempts++;
+  } while (attempts < 200 && (idx === todayIdx || history.indexOf(idx) !== -1 ||
+            (otherRecipe && hasConflict(list[idx], otherRecipe))));
+  return { idx: idx, recipe: list[idx] };
 }
 
 function hasReminder() {
@@ -1317,6 +1326,8 @@ function init() {
   var pair = findCompatiblePair(availStaples, availDishes, stapleToday, dishToday);
   stapleToday = pair.sIdx;
   dishToday = pair.dIdx;
+  currentStaple = pair.staple;
+  currentDish = pair.dish;
 
   if (hasReminder()) {
     document.getElementById('reminder-section').classList.remove('hidden');

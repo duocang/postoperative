@@ -1061,6 +1061,63 @@ function filterByMeal(list) {
   return list.filter(function(r) { return getMeal(r).indexOf(currentMeal) !== -1; });
 }
 
+var INGREDIENT_MAP = {
+  '南瓜': '南瓜', '山药': '山药', '胡萝卜': '胡萝卜', '菠菜': '菠菜',
+  '冬瓜': '冬瓜', '西葫芦': '西葫芦', '白萝卜': '萝卜', '萝卜丝': '萝卜',
+  '丝瓜': '丝瓜', '土豆': '土豆', '鸡': '鸡肉', '猪肝': '猪肝',
+  '里脊': '猪肉', '肉末': '猪肉', '肉片': '猪肉', '肉丸': '猪肉', '肉饼': '猪肉',
+  '排骨': '猪肉', '牛肉': '牛肉', '虾仁': '虾', '鱼肠': '鱼',
+  '鸡蛋': '蛋', '蛋花': '蛋', '蒸蛋': '蛋', '蛋白': '蛋',
+  '豆腐': '豆腐', '小米': '小米', '大米': '大米',
+  '藕粉': '藕', '藕片': '藕', '金针菇': '菇', '平菇': '菇', '香菇': '菇',
+  '西兰花': '西兰花', '花菜': '花菜', '娃娃菜': '白菜', '大白菜': '白菜', '白菜': '白菜',
+  '番茄': '番茄', '上海青': '青菜', '青菜': '青菜', '生菜': '青菜', '茼蒿': '青菜',
+  '鲈鱼': '鱼', '鲫鱼': '鱼', '鳊鱼': '鱼', '鱼片': '鱼', '鱼肉': '鱼',
+  '秋葵': '秋葵', '红薯': '薯', '紫薯': '薯',
+  '面线': '面', '面条': '面', '挂面': '面', '馄饨': '面',
+  '粉丝': '粉丝', '红枣': '红枣', '桂圆': '桂圆',
+  '莲子': '莲子', '银耳': '银耳', '百合': '百合', '玉米': '玉米'
+};
+
+function getKeyIngredients(recipe) {
+  var keys = [];
+  var n = recipe.name;
+  for (var k in INGREDIENT_MAP) {
+    if (n.indexOf(k) !== -1) keys.push(INGREDIENT_MAP[k]);
+  }
+  return keys;
+}
+
+function hasConflict(staple, dish) {
+  var sKeys = getKeyIngredients(staple);
+  var dKeys = getKeyIngredients(dish);
+  for (var i = 0; i < sKeys.length; i++) {
+    if (dKeys.indexOf(sKeys[i]) !== -1) return true;
+  }
+  return false;
+}
+
+function findCompatiblePair(stapleList, dishList, sIdx, dIdx) {
+  var staple = stapleList[sIdx];
+  var dish = dishList[dIdx];
+  if (!hasConflict(staple, dish)) return { staple: staple, dish: dish, sIdx: sIdx, dIdx: dIdx };
+
+  // Try swapping dish first
+  for (var i = 0; i < dishList.length; i++) {
+    if (i !== dIdx && !hasConflict(staple, dishList[i])) {
+      return { staple: staple, dish: dishList[i], sIdx: sIdx, dIdx: i };
+    }
+  }
+  // Try swapping staple
+  for (var j = 0; j < stapleList.length; j++) {
+    if (j !== sIdx && !hasConflict(stapleList[j], dish)) {
+      return { staple: stapleList[j], dish: dish, sIdx: j, dIdx: dIdx };
+    }
+  }
+  // Fallback: original pair (rare conflict unavoidable)
+  return { staple: staple, dish: dish, sIdx: sIdx, dIdx: dIdx };
+}
+
 function renderColumn(prefix, recipe) {
   var nameEl = document.getElementById(prefix + '-name');
   var timeEl = document.getElementById(prefix + '-time');
@@ -1180,18 +1237,21 @@ function init() {
 
   stapleToday = getTodayIndex(availStaples);
   dishToday = getTodayIndex(availDishes);
+  var pair = findCompatiblePair(availStaples, availDishes, stapleToday, dishToday);
+  stapleToday = pair.sIdx;
+  dishToday = pair.dIdx;
 
   if (hasReminder()) {
     document.getElementById('reminder-section').classList.remove('hidden');
     document.getElementById('recipe-section').classList.remove('hidden');
-    renderColumn('staple', getToday(availStaples));
-    renderColumn('dish', getToday(availDishes));
+    renderColumn('staple', pair.staple);
+    renderColumn('dish', pair.dish);
     document.title = '今日叮嘱';
   } else {
     document.getElementById('reminder-section').classList.add('hidden');
     document.getElementById('recipe-section').classList.remove('hidden');
-    renderColumn('staple', getToday(availStaples));
-    renderColumn('dish', getToday(availDishes));
+    renderColumn('staple', pair.staple);
+    renderColumn('dish', pair.dish);
     stapleSwapHistory.push(stapleToday);
     dishSwapHistory.push(dishToday);
   }

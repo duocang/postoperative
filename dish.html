@@ -222,6 +222,36 @@
     flex-shrink: 0;
   }
 
+  /* Tag Row */
+  .tag-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .difficulty-stars {
+    font-size: 17px;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+  }
+  .nutrition-tag {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 1px 5px;
+    border-radius: 100px;
+    flex-shrink: 0;
+    line-height: 1.4;
+  }
+  .nutrition-tag.protein   { background: #FFF0F0; color: #C0392B; border: 1px solid #F5C6CB; }
+  .nutrition-tag.digest    { background: #F0F9F4; color: #1E7E34; border: 1px solid #C3E6CB; }
+  .nutrition-tag.iron      { background: #FFF8EE; color: #B85C00; border: 1px solid #F5D6B0; }
+  .nutrition-tag.fiber     { background: #EEF9EE; color: #2E7D32; border: 1px solid #B7DFB9; }
+  .nutrition-tag.calcium   { background: #F0F4FF; color: #1A5276; border: 1px solid #B8CFF5; }
+  .nutrition-tag.lowfat    { background: #F5F8FA; color: #5D6D7E; border: 1px solid #D5DBDB; }
+
   /* Content Sections */
   .col-body {
     padding: 0 8px 8px;
@@ -418,6 +448,10 @@
             <span id="staple-method"></span>
           </span>
         </div>
+        <div class="tag-row">
+          <span id="staple-difficulty" class="difficulty-stars"></span>
+          <span id="staple-nutrition"></span>
+        </div>
         <div class="col-body">
           <div class="section-block ingredients-block">
             <div class="section-label">
@@ -466,6 +500,10 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2"/><path d="M12 6v6l4 2"/></svg>
             <span id="dish-method"></span>
           </span>
+        </div>
+        <div class="tag-row">
+          <span id="dish-difficulty" class="difficulty-stars"></span>
+          <span id="dish-nutrition"></span>
         </div>
         <div class="col-body">
           <div class="section-block ingredients-block">
@@ -1127,6 +1165,8 @@ function renderColumn(prefix, recipe) {
   var instrEl = document.getElementById(prefix + '-instructions');
   var tipEl = document.getElementById(prefix + '-tip');
   var tipTextEl = document.getElementById(prefix + '-tip-text');
+  var diffEl = document.getElementById(prefix + '-difficulty');
+  var nutEl = document.getElementById(prefix + '-nutrition');
 
   if (!recipe) {
     nameEl.textContent = '暂无';
@@ -1136,6 +1176,8 @@ function renderColumn(prefix, recipe) {
     ingEl.textContent = '';
     instrEl.innerHTML = '';
     tipEl.classList.add('hidden');
+    if (diffEl) diffEl.textContent = '';
+    if (nutEl) nutEl.innerHTML = '';
     return;
   }
 
@@ -1169,6 +1211,41 @@ function renderColumn(prefix, recipe) {
     tipTextEl.textContent = '';
     tipEl.classList.add('hidden');
   }
+
+  // Difficulty stars
+  var stars = getDifficulty(recipe);
+  if (diffEl) diffEl.textContent = stars;
+
+  // Nutrition tags
+  var tags = getNutritionTags(recipe);
+  if (nutEl) {
+    nutEl.innerHTML = '';
+    for (var t = 0; t < tags.length; t++) {
+      var span = document.createElement('span');
+      span.className = 'nutrition-tag ' + tags[t].cls;
+      span.textContent = tags[t].label;
+      nutEl.appendChild(span);
+    }
+  }
+}
+
+function getDifficulty(recipe) {
+  if (recipe.steps <= 1 || recipe.method === '冲调') return '★';
+  if (recipe.steps === 2 && (recipe.method === '蒸' || recipe.method === '煮')) return '★★';
+  return '★★★';
+}
+
+function getNutritionTags(recipe) {
+  var tags = [];
+  var n = recipe.name;
+  var ing = recipe.ingredients.join('');
+  if (/鸡|鱼|虾|肉|蛋|豆腐|牛肉|猪肝/.test(n)) tags.push({ cls: 'protein', label: '高蛋白' });
+  if (/粥|糊|羹|泥|蒸蛋|豆腐|汤/.test(n) && recipe.method !== '清炒' && recipe.method !== '炖') tags.push({ cls: 'digest', label: '易消化' });
+  if (/猪肝|菠菜|红枣/.test(n)) tags.push({ cls: 'iron', label: '补铁' });
+  if (/西兰花|花菜|菠菜|白菜|青菜|秋葵|胡萝卜|芹菜|茼蒿|金针菇|平菇|香菇|南瓜/.test(n)) tags.push({ cls: 'fiber', label: '高纤维' });
+  if (/豆腐|虾|排骨|鲫鱼|银耳/.test(n)) tags.push({ cls: 'calcium', label: '补钙' });
+  if (/牛肉|猪里脊|鸡胸|鲈鱼|蛋白|蒸/.test(n) && !/排骨/.test(n) && !/五花/.test(ing)) tags.push({ cls: 'lowfat', label: '低脂' });
+  return tags.slice(0, 3); // max 3 tags
 }
 
 function getToday(list) {

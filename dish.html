@@ -112,9 +112,26 @@
     transition: border-color 0.2s;
   }
   .meal-row.current {
-    border-color: var(--color-primary);
     box-shadow: var(--shadow-md);
   }
+
+  /* Breakfast: warm amber */
+  .meal-breakfast { border-color: #E8C876; }
+  .meal-breakfast .meal-header { background: #FFFBF0; }
+  .meal-breakfast.current { border-color: #D4A017; border-width: 2.5px; }
+  .meal-breakfast.current .meal-header { background: #FFF3CD; border-bottom-color: #E8C876; }
+
+  /* Lunch: fresh green */
+  .meal-lunch { border-color: #8FBC8F; }
+  .meal-lunch .meal-header { background: #F4FAF6; }
+  .meal-lunch.current { border-color: #5B8A72; border-width: 2.5px; }
+  .meal-lunch.current .meal-header { background: #D4E8DC; border-bottom-color: #8FBC8F; }
+
+  /* Dinner: calm indigo */
+  .meal-dinner { border-color: #9BA4C9; }
+  .meal-dinner .meal-header { background: #F4F5FB; }
+  .meal-dinner.current { border-color: #6B7DB3; border-width: 2.5px; }
+  .meal-dinner.current .meal-header { background: #D8DDF0; border-bottom-color: #9BA4C9; }
 
   .meal-header {
     display: flex;
@@ -122,11 +139,6 @@
     gap: 8px;
     padding: 6px 12px;
     border-bottom: 1px solid var(--color-divider);
-    background: #FAFAF7;
-  }
-  .meal-row.current .meal-header {
-    background: var(--color-primary-bg);
-    border-bottom-color: var(--color-primary-light);
   }
 
   .meal-icon {
@@ -209,13 +221,17 @@
   }
 
   .item-meta {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 5px;
     color: var(--color-text-secondary);
     flex-wrap: wrap;
     font-size: 14px;
   }
+  .item-meta .meta-time   { display: inline-block; min-width: 4.2em; text-align: right; }
+  .item-meta .meta-steps  { display: inline-block; min-width: 2.5em; text-align: right; }
+  .item-meta .meta-method { display: inline-block; min-width: 2em; text-align: center; }
+  .item-meta .meta-stars  { display: inline-block; min-width: 3.2em; text-align: left; font-size: 14px; }
   .item-meta .sep { color: var(--color-divider); }
 
   /* Expand Toggle */
@@ -1363,20 +1379,22 @@ function renderCompact(meal, staple, dish) {
       '<span class="item-cat staple">主食</span>' +
       '<span class="item-name">' + staple.name + '</span>' +
       '<span class="item-meta">' +
-        staple.time + ' <span class="sep">·</span> ' + staple.steps + '步 <span class="sep">·</span> ' +
-        staple.method + ' <span class="sep">·</span> ' +
-        '<span style="font-size:13px">' + sStars + '</span>' +
-        (sTagStr ? ' <span class="sep">·</span> ' + sTagStr : '') +
+        '<span class="meta-time">' + staple.time + '</span><span class="sep">·</span>' +
+        '<span class="meta-steps">' + staple.steps + '步</span><span class="sep">·</span>' +
+        '<span class="meta-method">' + staple.method + '</span><span class="sep">·</span>' +
+        '<span class="meta-stars">' + sStars + '</span>' +
+        (sTagStr ? '<span class="sep">·</span>' + sTagStr : '') +
       '</span>' +
     '</div>' +
     '<div class="meal-item">' +
       '<span class="item-cat dish">菜品</span>' +
       '<span class="item-name">' + dish.name + '</span>' +
       '<span class="item-meta">' +
-        dish.time + ' <span class="sep">·</span> ' + dish.steps + '步 <span class="sep">·</span> ' +
-        dish.method + ' <span class="sep">·</span> ' +
-        '<span style="font-size:13px">' + dStars + '</span>' +
-        (dTagStr ? ' <span class="sep">·</span> ' + dTagStr : '') +
+        '<span class="meta-time">' + dish.time + '</span><span class="sep">·</span>' +
+        '<span class="meta-steps">' + dish.steps + '步</span><span class="sep">·</span>' +
+        '<span class="meta-method">' + dish.method + '</span><span class="sep">·</span>' +
+        '<span class="meta-stars">' + dStars + '</span>' +
+        (dTagStr ? '<span class="sep">·</span>' + dTagStr : '') +
       '</span>' +
     '</div>';
 }
@@ -1470,6 +1488,7 @@ function init() {
 
   var meals = ['早', '午', '晚'];
   var currentMeal = getCurrentMeal();
+  var mealClasses = { '早': 'meal-breakfast', '午': 'meal-lunch', '晚': 'meal-dinner' };
 
   for (var m = 0; m < meals.length; m++) {
     var meal = meals[m];
@@ -1486,9 +1505,11 @@ function init() {
     state.stapleHistory = [pair.sIdx];
     state.dishHistory = [pair.dIdx];
     renderCompact(meal, pair.staple, pair.dish);
-    if (meal === currentMeal) {
-      var row = document.querySelector('.meal-row[data-meal="' + meal + '"]');
-      if (row) row.classList.add('current');
+
+    var row = document.querySelector('.meal-row[data-meal="' + meal + '"]');
+    if (row) {
+      row.classList.add(mealClasses[meal]);
+      if (meal === currentMeal) row.classList.add('current');
     }
   }
 }

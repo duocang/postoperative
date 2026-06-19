@@ -193,10 +193,10 @@
   }
 
   .meal-item {
-    display: flex;
+    display: grid;
+    grid-template-columns: 2.8em 1fr 4.5em 2.6em 2.5em 3.2em 1fr;
+    column-gap: 5px;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
     font-size: 17px;
     line-height: 1.4;
   }
@@ -204,12 +204,14 @@
   .item-cat {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 2px;
     font-size: 13px;
     font-weight: 700;
     padding: 1px 6px;
     border-radius: 100px;
     flex-shrink: 0;
+    white-space: nowrap;
   }
   .item-cat.staple { background: var(--color-primary); color: #fff; }
   .item-cat.dish   { background: var(--color-accent); color: #fff; }
@@ -217,22 +219,21 @@
   .item-name {
     font-weight: 700;
     color: var(--color-text);
-    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
   }
 
   .item-meta {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    color: var(--color-text-secondary);
-    flex-wrap: wrap;
-    font-size: 14px;
+    display: contents;
   }
-  .item-meta .meta-time   { display: inline-block; min-width: 4.2em; text-align: right; }
-  .item-meta .meta-steps  { display: inline-block; min-width: 2.5em; text-align: right; }
-  .item-meta .meta-method { display: inline-block; min-width: 2em; text-align: center; }
-  .item-meta .meta-stars  { display: inline-block; min-width: 3.2em; text-align: left; font-size: 14px; }
-  .item-meta .sep { color: var(--color-divider); }
+  .item-meta .sep { display: none; }
+
+  .meta-time   { text-align: right; white-space: nowrap; font-size: 14px; color: var(--color-text-secondary); }
+  .meta-steps  { text-align: right; white-space: nowrap; font-size: 14px; color: var(--color-text-secondary); }
+  .meta-method { text-align: center; white-space: nowrap; font-size: 14px; color: var(--color-text-secondary); }
+  .meta-stars  { text-align: left; white-space: nowrap; font-size: 14px; color: var(--color-text-secondary); }
 
   /* Expand Toggle */
   .expand-toggle {

@@ -1,1565 +1,2094 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>每日菜谱</title>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
-
-  :root {
-    --color-bg: #FFFFFF;
-    --color-surface: #FFFFFF;
-    --color-text: #2D1B0E;
-    --color-text-secondary: #6B5240;
-    --color-primary: #8B6BAE;
-    --color-primary-light: #D4C4E8;
-    --color-primary-bg: #F6F2FA;
-    --color-accent: #5B8A72;
-    --color-accent-light: #D4E8DC;
-    --color-accent-bg: #F0F7F3;
-    --color-warm: #9B7EC4;
-    --color-warm-light: #F3EEF8;
-    --color-tip-bg: #FFF8ED;
-    --color-tip-border: #D4A853;
-    --color-divider: #E8DDD0;
-    --shadow-sm: 0 1px 2px rgba(45, 27, 14, 0.05);
-    --shadow-md: 0 2px 6px rgba(45, 27, 14, 0.08);
-    --shadow-lg: 0 4px 12px rgba(45, 27, 14, 0.1);
-    --radius-lg: 14px;
-    --radius-md: 10px;
-    --radius-sm: 8px;
-  }
-
-  html, body {
-    min-height: 100vh;
-  }
-
-  body {
-    font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
-    background: var(--color-bg);
-    color: var(--color-text);
-    padding: 6px 8px;
-    font-size: 18px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .container {
-    width: 100%;
-    max-width: none;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .hidden { display: none !important; }
-
-  /* ===== Reminder Card ===== */
-  .reminder-card {
-    background: linear-gradient(135deg, #EBF4FF 0%, #F5F9FF 100%);
-    border-radius: var(--radius-md);
-    padding: 6px 20px;
-    box-shadow: var(--shadow-md);
-    border: 2px solid #A3C9F7;
-    text-align: center;
-  }
-  .reminder-text {
-    font-size: 28px;
-    font-weight: 700;
-    color: #2B6CB0;
-    line-height: 1.3;
-  }
-  .reminder-sub {
-    font-size: 22px;
-    font-weight: 500;
-    color: #4A8BC2;
-    line-height: 1.3;
-    margin-top: 4px;
-  }
-
-  /* ===== Diet Note ===== */
-  .diet-note {
-    background: linear-gradient(135deg, #FFF5F5 0%, #FFF0F0 100%);
-    border: 1px solid #F5C6CB;
-    border-radius: var(--radius-sm);
-    padding: 4px 14px;
-    font-size: 15px;
-    color: #A94442;
-    text-align: center;
-    font-weight: 500;
-    letter-spacing: 1px;
-  }
-
-  /* ===== Meal Rows ===== */
-  .meals-section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .meal-row {
-    background: var(--color-surface);
-    border-radius: var(--radius-md);
-    border: 2px solid var(--color-divider);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .meal-row.current {
-    box-shadow: var(--shadow-md);
-  }
-
-  /* Breakfast: warm amber */
-  .meal-breakfast { border-color: #E8C876; }
-  .meal-breakfast .meal-header { background: #FFFBF0; }
-  .meal-breakfast.current { border-color: #D4A017; border-width: 2.5px; }
-  .meal-breakfast.current .meal-header { background: #FFF3CD; border-bottom-color: #E8C876; }
-
-  /* Lunch: fresh green */
-  .meal-lunch { border-color: #8FBC8F; }
-  .meal-lunch .meal-header { background: #F4FAF6; }
-  .meal-lunch.current { border-color: #5B8A72; border-width: 2.5px; }
-  .meal-lunch.current .meal-header { background: #D4E8DC; border-bottom-color: #8FBC8F; }
-
-  /* Dinner: calm indigo */
-  .meal-dinner { border-color: #9BA4C9; }
-  .meal-dinner .meal-header { background: #F4F5FB; }
-  .meal-dinner.current { border-color: #6B7DB3; border-width: 2.5px; }
-  .meal-dinner.current .meal-header { background: #D8DDF0; border-bottom-color: #9BA4C9; }
-
-  .meal-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 12px;
-    border-bottom: 1px solid var(--color-divider);
-  }
-
-  .meal-icon {
-    font-size: 24px;
-    flex-shrink: 0;
-  }
-
-  .meal-label {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--color-text);
-    flex: 1;
-  }
-
-  .meal-actions {
-    display: flex;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-
-  .btn-meal-swap {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    padding: 3px 10px;
-    font-size: 14px;
-    font-family: inherit;
-    font-weight: 600;
-    border: 1px solid var(--color-divider);
-    border-radius: var(--radius-sm);
-    background: var(--color-surface);
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .btn-meal-swap:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-    background: var(--color-primary-bg);
-  }
-  .btn-meal-swap:active { transform: scale(0.96); }
-  .btn-meal-swap:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-
-  .meal-compact {
-    padding: 6px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .meal-item {
-    display: grid;
-    grid-template-columns: 2.8em 1fr 4.5em 2.6em 2.5em 3.2em 1fr;
-    column-gap: 5px;
-    align-items: center;
-    font-size: 17px;
-    line-height: 1.4;
-  }
-
-  .item-cat {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 1px 6px;
-    border-radius: 100px;
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-  .item-cat.staple { background: var(--color-primary); color: #fff; }
-  .item-cat.dish   { background: var(--color-accent); color: #fff; }
-
-  .item-name {
-    font-weight: 700;
-    color: var(--color-text);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    min-width: 0;
-  }
-
-  .item-meta {
-    display: contents;
-  }
-  .item-meta .sep { display: none; }
-
-  .meta-time   { text-align: right; white-space: nowrap; font-size: 14px; color: var(--color-text-secondary); }
-  .meta-steps  { text-align: right; white-space: nowrap; font-size: 14px; color: var(--color-text-secondary); }
-  .meta-method { text-align: center; white-space: nowrap; font-size: 14px; color: var(--color-text-secondary); }
-  .meta-stars  { text-align: left; white-space: nowrap; font-size: 14px; color: var(--color-text-secondary); }
-
-  /* Expand Toggle */
-  .expand-toggle {
-    display: block;
-    width: 100%;
-    text-align: center;
-    padding: 4px;
-    font-size: 14px;
-    font-family: inherit;
-    font-weight: 500;
-    color: var(--color-primary);
-    background: none;
-    border: none;
-    border-top: 1px dashed var(--color-divider);
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-  .expand-toggle:hover { background: var(--color-primary-bg); }
-
-  /* Detail Section */
-  .meal-detail {
-    border-top: 1px solid var(--color-divider);
-    padding: 8px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .detail-card {
-    border-radius: var(--radius-sm);
-    padding: 6px 8px;
-    border: 1px solid var(--color-divider);
-  }
-  .detail-card.staple-card {
-    background: #F3EEF8;
-    border-color: rgba(155, 126, 196, 0.2);
-  }
-  .detail-card.dish-card {
-    background: #EDF5F0;
-    border-color: rgba(91, 138, 114, 0.2);
-  }
-
-  .detail-card .detail-title {
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--color-text);
-    margin-bottom: 3px;
-  }
-  .detail-card .detail-ingredients {
-    font-size: 15px;
-    color: var(--color-text);
-    margin-bottom: 4px;
-    line-height: 1.5;
-  }
-  .detail-card .detail-steps {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  .detail-card .detail-steps li {
-    display: flex;
-    align-items: flex-start;
-    gap: 5px;
-    padding: 2px 0;
-    font-size: 15px;
-    color: var(--color-text);
-    line-height: 1.5;
-  }
-  .detail-card .detail-steps li + li {
-    border-top: 1px dashed var(--color-divider);
-  }
-  .detail-card .detail-step-num {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    font-size: 11px;
-    font-weight: 700;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-  .detail-card.staple-card .detail-step-num { background: var(--color-primary); color: #fff; }
-  .detail-card.dish-card .detail-step-num { background: var(--color-accent); color: #fff; }
-
-  .detail-card .detail-tip {
-    margin-top: 4px;
-    font-size: 14px;
-    color: var(--color-text-secondary);
-    padding: 3px 6px;
-    border-radius: var(--radius-sm);
-    line-height: 1.4;
-  }
-  .detail-card.staple-card .detail-tip {
-    background: #F8F4FC;
-    border-left: 3px solid #9B7EC4;
-  }
-  .detail-card.dish-card .detail-tip {
-    background: #EDF7F2;
-    border-left: 3px solid #5B8A72;
-  }
-
-  /* ===== Meal Indicator ===== */
-  .meal-indicator {
-    text-align: center;
-    font-size: 34px;
-    font-weight: 700;
-    color: var(--color-primary);
-    padding: 2px 0 0;
-    line-height: 1.3;
-  }
-
-  /* ===== Recipe Grid ===== */
-  .recipe-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-  }
-
-  /* ===== Column Card ===== */
-  .recipe-column {
-    background: var(--color-surface);
-    border-radius: var(--radius-md);
-    border: 2px solid var(--color-divider);
-    box-shadow: var(--shadow-lg);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .col-header {
-    padding: 5px 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-  }
-  #col-staple .col-header {
-    background: linear-gradient(135deg, var(--color-primary-bg) 0%, var(--color-surface) 100%);
-    border-bottom: 2px solid var(--color-primary-light);
-  }
-  #col-dish .col-header {
-    background: linear-gradient(135deg, var(--color-accent-bg) 0%, var(--color-surface) 100%);
-    border-bottom: 2px solid var(--color-accent-light);
-  }
-
-  .col-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 15px;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 100px;
-    flex-shrink: 0;
-  }
-  .col-badge svg {
-    width: 10px;
-    height: 10px;
-  }
-  #col-staple .col-badge {
-    background: var(--color-primary);
-    color: #fff;
-  }
-  #col-dish .col-badge {
-    background: var(--color-accent);
-    color: #fff;
-  }
-
-  .col-name {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--color-text);
-    line-height: 1.2;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .btn-swap {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    padding: 3px 8px;
-    font-size: 16px;
-    font-family: inherit;
-    font-weight: 600;
-    border: 1px solid var(--color-divider);
-    border-radius: var(--radius-sm);
-    background: var(--color-surface);
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    transition: all 0.15s ease;
-    flex-shrink: 0;
-    min-width: 36px;
-    min-height: 28px;
-  }
-  .btn-swap:hover {
-    border-color: var(--color-primary);
-    color: var(--color-primary);
-    background: var(--color-primary-bg);
-  }
-  .btn-swap:active { transform: scale(0.96); }
-  .btn-swap:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 1px;
-  }
-  .btn-swap:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-  .btn-swap svg {
-    width: 12px;
-    height: 12px;
-  }
-
-  /* Meta Row */
-  .meta-row {
-    display: flex;
-    gap: 4px;
-    padding: 4px 10px;
-    flex-shrink: 0;
-  }
-  .meta-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 15px;
-    color: var(--color-text-secondary);
-    background: var(--color-bg);
-    padding: 1px 5px;
-    border-radius: 100px;
-  }
-  .meta-item svg {
-    width: 10px;
-    height: 10px;
-    flex-shrink: 0;
-  }
-
-  /* Tag Row */
-  .tag-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 2px 10px;
-    flex-shrink: 0;
-    flex-wrap: wrap;
-  }
-  .difficulty-stars {
-    font-size: 17px;
-    letter-spacing: 1px;
-    flex-shrink: 0;
-  }
-  .nutrition-tag {
-    display: inline-block;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 1px 5px;
-    border-radius: 100px;
-    flex-shrink: 0;
-    line-height: 1.4;
-  }
-  .nutrition-tag.protein   { background: #FFF0F0; color: #C0392B; border: 1px solid #F5C6CB; }
-  .nutrition-tag.digest    { background: #F0F9F4; color: #1E7E34; border: 1px solid #C3E6CB; }
-  .nutrition-tag.iron      { background: #FFF8EE; color: #B85C00; border: 1px solid #F5D6B0; }
-  .nutrition-tag.fiber     { background: #EEF9EE; color: #2E7D32; border: 1px solid #B7DFB9; }
-  .nutrition-tag.calcium   { background: #F0F4FF; color: #1A5276; border: 1px solid #B8CFF5; }
-  .nutrition-tag.lowfat    { background: #F5F8FA; color: #5D6D7E; border: 1px solid #D5DBDB; }
-
-  /* Content Sections */
-  .col-body {
-    padding: 0 8px 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-
-  .section-block {
-    border-radius: var(--radius-sm);
-    padding: 5px 7px;
-  }
-  .ingredients-block {
-    background: var(--color-warm-light);
-    border: 1px solid rgba(201, 169, 110, 0.3);
-    flex-shrink: 0;
-  }
-  #col-dish .ingredients-block {
-    background: #EDF5F0;
-    border-color: rgba(91, 138, 114, 0.2);
-  }
-  #col-staple .ingredients-block {
-    background: #F3EEF8;
-    border-color: rgba(155, 126, 196, 0.2);
-  }
-
-  .section-label {
-    display: flex;
-    align-items: center;
-    gap: 3px;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--color-text);
-    margin-bottom: 2px;
-  }
-  .section-label svg {
-    width: 11px;
-    height: 11px;
-  }
-  #col-staple .section-label svg { color: var(--color-warm); }
-  #col-dish .section-label svg { color: var(--color-accent); }
-
-  .ingredients-text {
-    font-size: 16px;
-    color: var(--color-text);
-    line-height: 1.6;
-  }
-  .ingredient-tag {
-    display: inline-block;
-    background: var(--color-surface);
-    padding: 0px 4px;
-    border-radius: 4px;
-    margin: 1px 2px;
-    border: 1px solid var(--color-divider);
-    font-size: 15px;
-  }
-
-  /* Instructions */
-  .instructions-block {
-    background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-  }
-  .instructions-list {
-    list-style: none;
-    padding: 0;
-  }
-  .instructions-list li {
-    display: flex;
-    align-items: flex-start;
-    gap: 5px;
-    padding: 3px 0;
-    font-size: 16px;
-    color: var(--color-text);
-    line-height: 1.5;
-  }
-  .instructions-list li + li {
-    border-top: 1px dashed var(--color-divider);
-  }
-  .step-num {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    font-size: 12px;
-    font-weight: 700;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  #col-staple .step-num {
-    background: var(--color-primary);
-    color: #fff;
-  }
-  #col-dish .step-num {
-    background: var(--color-accent);
-    color: #fff;
-  }
-  .step-text {
-    flex: 1;
-  }
-
-  /* Tip */
-  .tip-block {
-    background: var(--color-tip-bg);
-    border: 1px solid rgba(212, 168, 83, 0.3);
-    border-left: 3px solid var(--color-tip-border);
-    display: flex;
-    align-items: flex-start;
-    gap: 4px;
-    padding: 4px 6px;
-    flex-shrink: 0;
-  }
-  .tip-block svg {
-    width: 12px;
-    height: 12px;
-    color: var(--color-tip-border);
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  #col-staple .tip-block {
-    background: #F8F4FC;
-    border: 1px solid rgba(155, 126, 196, 0.25);
-    border-left: 3px solid #9B7EC4;
-  }
-  #col-staple .tip-block svg {
-    color: #9B7EC4;
-  }
-  #col-dish .tip-block {
-    background: #EDF7F2;
-    border: 1px solid rgba(91, 138, 114, 0.2);
-    border-left: 3px solid #5B8A72;
-  }
-  #col-dish .tip-block svg {
-    color: #5B8A72;
-  }
-  .tip-text {
-    font-size: 15px;
-    color: var(--color-text-secondary);
-    line-height: 1.5;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      transition-duration: 0.01ms !important;
-      animation-duration: 0.01ms !important;
-    }
-  }
-</style>
-</head>
-<body>
-
-<div class="container">
-
-  <!-- Reminder -->
-  <div id="reminder-section" class="hidden">
-    <div class="reminder-card">
-      <div id="reminder-text" class="reminder-text">冰箱有酸奶</div>
-      <div id="reminder-sub" class="reminder-sub">冰柜南瓜泥切小块，装袋放冰柜</div>
-    </div>
-  </div>
-
-  <!-- Diet Note -->
-  <div class="diet-note">🥄 胰腺友好：低脂少油 · 少食多餐 · 晚餐清淡 · 趁热吃</div>
-
-  <!-- Meals -->
-  <div class="meals-section">
-    <div class="meal-row" data-meal="早">
-      <div class="meal-header">
-        <span class="meal-icon">🥣</span>
-        <span class="meal-label">早餐</span>
-        <div class="meal-actions">
-          <button class="btn-meal-swap" onclick="swapMeal('早','staple')">换主食</button>
-          <button class="btn-meal-swap" onclick="swapMeal('早','dish')">换菜品</button>
-        </div>
-      </div>
-      <div class="meal-compact" id="compact-早"></div>
-      <button class="expand-toggle" id="toggle-早" onclick="toggleMeal('早')">▾ 查看做法</button>
-      <div class="meal-detail hidden" id="detail-早"></div>
-    </div>
-
-    <div class="meal-row" data-meal="午">
-      <div class="meal-header">
-        <span class="meal-icon">🍚</span>
-        <span class="meal-label">午餐</span>
-        <div class="meal-actions">
-          <button class="btn-meal-swap" onclick="swapMeal('午','staple')">换主食</button>
-          <button class="btn-meal-swap" onclick="swapMeal('午','dish')">换菜品</button>
-        </div>
-      </div>
-      <div class="meal-compact" id="compact-午"></div>
-      <button class="expand-toggle" id="toggle-午" onclick="toggleMeal('午')">▾ 查看做法</button>
-      <div class="meal-detail hidden" id="detail-午"></div>
-    </div>
-
-    <div class="meal-row" data-meal="晚">
-      <div class="meal-header">
-        <span class="meal-icon">🌙</span>
-        <span class="meal-label">晚餐</span>
-        <div class="meal-actions">
-          <button class="btn-meal-swap" onclick="swapMeal('晚','staple')">换主食</button>
-          <button class="btn-meal-swap" onclick="swapMeal('晚','dish')">换菜品</button>
-        </div>
-      </div>
-      <div class="meal-compact" id="compact-晚"></div>
-      <button class="expand-toggle" id="toggle-晚" onclick="toggleMeal('晚')">▾ 查看做法</button>
-      <div class="meal-detail hidden" id="detail-晚"></div>
-    </div>
-  </div>
-
-</div>
-
-<script>
-var recipes = [
-  {
-    name: "清蒸鲈鱼配山药泥",
-    category: "菜",    time: "15分钟", steps: 3, method: "清蒸",
-    ingredients: ["鲈鱼1条", "山药200g", "姜丝", "葱花", "盐少许", "香油几滴"],
-    instructions: [
-      "鲈鱼洗净，鱼身划两刀，铺姜丝，上锅蒸8分钟",
-      "山药去皮切块，同时蒸15分钟，取出捣成泥",
-      "鱼出锅撒葱花、淋少许香油，山药泥铺底装盘"
-    ],
-    tip: "鲈鱼刺少肉嫩，容易消化，适合术后食用"
-  },
-  {
-    name: "菠菜鸡蛋羹",
-    category: "菜",    time: "12分钟", steps: 3, method: "清蒸",
-    ingredients: ["鸡蛋2个", "菠菜50g", "温水（鸡蛋的1.5倍）", "盐少许", "香油几滴"],
-    instructions: [
-      "鸡蛋打散，加入温水和少许盐搅匀",
-      "菠菜焯水后挤干切碎末，撒入蛋液中拌匀",
-      "撇去泡沫，上锅蒸8-10分钟，出锅淋香油"
-    ],
-    tip: "菠菜碎和蛋液一起蒸，一步到位有菜有蛋白"
-  },
-  {
-    name: "山药排骨蒸蛋",
-    category: "菜",    time: "25分钟", steps: 3, method: "清蒸",
-    ingredients: ["排骨150g", "山药100g", "鸡蛋1个", "姜2片", "盐少许"],
-    instructions: [
-      "排骨冷水下锅焯去血沫，捞出洗净",
-      "山药去皮切滚刀块，与排骨一起放入碗中",
-      "打入鸡蛋，加少许水和盐，上锅蒸20分钟"
-    ],
-    tip: "排骨选小排，肉嫩易嚼"
-  },
-  {
-    name: "胡萝卜鸡茸粥",
-    category: "主食",    time: "30分钟", steps: 3, method: "煮",
-    ingredients: ["大米半杯", "鸡胸肉80g", "胡萝卜半根", "姜丝", "盐少许"],
-    instructions: [
-      "大米洗净加水，大火煮开后转小火熬20分钟",
-      "鸡胸肉剁成茸，胡萝卜擦细丝",
-      "粥快好时加入鸡茸和胡萝卜丝，搅散煮5分钟，加盐调味"
-    ],
-    tip: "鸡茸入锅后要快速搅散，防止结块"
-  },
-  {
-    name: "冬瓜蒸肉末",
-    category: "菜",    time: "20分钟", steps: 3, method: "清蒸",
-    ingredients: ["冬瓜300g", "猪里脊肉100g", "姜末", "盐少许", "生抽几滴"],
-    instructions: [
-      "冬瓜去皮切厚片，铺在盘底",
-      "里脊肉剁成末，加姜末、少许盐和生抽拌匀",
-      "肉末铺在冬瓜上，上锅蒸15分钟"
-    ],
-    tip: "冬瓜本身出水，蒸的时候不用额外加水"
-  },
-  {
-    name: "软烂小米粥",
-    category: "主食",    time: "25分钟", steps: 2, method: "煮",
-    ingredients: ["小米半杯", "水6杯", "南瓜100g（可选）"],
-    instructions: [
-      "小米淘洗干净，南瓜去皮切小丁",
-      "小米和南瓜一起加水，大火煮开转小火熬20分钟至粘稠"
-    ],
-    tip: "小米粥养胃易消化，可作早餐"
-  },
-  {
-    name: "白萝卜鲫鱼汤",
-    category: "菜",    time: "30分钟", steps: 3, method: "煮",
-    ingredients: ["鲫鱼1条", "白萝卜200g", "姜3片", "葱段", "盐少许"],
-    instructions: [
-      "鲫鱼洗净，白萝卜去皮切薄片",
-      "锅中放少许油，姜片爆香，鲫鱼两面略煎",
-      "加足量开水，放入白萝卜片，大火煮15分钟至汤白，加盐和葱花"
-    ],
-    tip: "加开水是汤白的关键，不要加冷水"
-  },
-  {
-    name: "西葫芦炒鸡蛋",
-    category: "菜",    time: "10分钟", steps: 2, method: "清炒",
-    ingredients: ["西葫芦1根", "鸡蛋2个", "盐少许", "油少许"],
-    instructions: [
-      "西葫芦切薄片，鸡蛋打散加少许盐",
-      "锅中少许油，先炒鸡蛋盛出，再炒西葫芦至软，倒回鸡蛋翻匀"
-    ],
-    tip: "西葫芦炒软即可，不要炒出水"
-  },
-  {
-    name: "土豆泥",
-    category: "主食",    time: "20分钟", steps: 2, method: "蒸",
-    ingredients: ["土豆2个（约300g）", "盐少许"],
-    instructions: [
-      "土豆去皮切块，上锅蒸20分钟至筷子轻松穿透",
-      "趁热用勺子压成泥，加少许盐拌匀即可"
-    ],
-    tip: "可做主食替代米饭，也可以当加餐"
-  },
-  {
-    name: "娃娃菜豆腐汤",
-    category: "菜",    time: "10分钟", steps: 2, method: "煮",
-    ingredients: ["娃娃菜1棵", "嫩豆腐半块", "姜丝", "盐少许", "香油几滴"],
-    instructions: [
-      "娃娃菜洗净切段，嫩豆腐切小块",
-      "水烧开，放入姜丝和娃娃菜煮3分钟，加入豆腐再煮2分钟，加盐和香油"
-    ],
-    tip: "清淡爽口，豆腐补充植物蛋白"
-  },
-  {
-    name: "南瓜小米粥",
-    category: "主食", time: "25分钟", steps: 2, method: "煮",
-    ingredients: ["小米半杯", "南瓜200g", "水适量"],
-    instructions: ["小米淘净，南瓜去皮切小丁", "一起加水大火煮开转小火熬20分钟"],
-    tip: "南瓜自带甜味，无需加糖"
-  },
-  {
-    name: "鸡茸豆腐羹",
-    category: "菜", time: "15分钟", steps: 3, method: "煮",
-    ingredients: ["鸡胸肉80g", "嫩豆腐半块", "鸡蛋清1个", "姜末", "盐少许", "水淀粉少许"],
-    instructions: ["鸡胸肉剁茸，豆腐捏碎", "水烧开加姜末，放入鸡茸搅散", "加入豆腐碎，淋蛋清搅成蛋花，少许水淀粉勾薄芡，加盐"],
-    tip: "勾薄芡让口感更滑嫩"
-  },
-  {
-    name: "胡萝卜蒸肉末",
-    category: "菜", time: "15分钟", steps: 3, method: "清蒸",
-    ingredients: ["胡萝卜1根", "里脊肉100g", "姜末", "盐少许"],
-    instructions: ["胡萝卜去皮擦细丝铺盘底", "里脊肉剁末加姜末盐拌匀", "肉末铺在胡萝卜丝上，上锅蒸12分钟"],
-    tip: "肉末汁渗入胡萝卜丝，清甜又营养"
-  },
-  {
-    name: "里脊肉片粥",
-    category: "主食", time: "30分钟", steps: 3, method: "煮",
-    ingredients: ["大米半杯", "猪里脊100g", "姜丝", "盐少许", "葱花"],
-    instructions: ["大米洗净加水熬粥20分钟", "里脊肉切薄片，用少许盐和姜丝腌5分钟", "粥快好时放入肉片搅散煮3分钟，撒葱花"],
-    tip: "肉片切得越薄越嫩"
-  },
-  {
-    name: "山药泥",
-    category: "主食", time: "20分钟", steps: 2, method: "蒸",
-    ingredients: ["山药300g", "盐少许（可选）"],
-    instructions: ["山药去皮切段，上锅蒸20分钟", "趁热用勺子压成泥即可"],
-    tip: "可做加餐或主食替代，山药带皮蒸更香"
-  },
-  {
-    name: "菠菜蛋花汤",
-    category: "菜", time: "8分钟", steps: 2, method: "煮",
-    ingredients: ["菠菜100g", "鸡蛋1个", "姜丝", "盐少许", "香油几滴"],
-    instructions: ["菠菜洗净切段，鸡蛋打散", "水烧开放姜丝和菠菜煮2分钟，淋入蛋花，加盐和香油"],
-    tip: "菠菜要先煮软，方便老人咀嚼"
-  },
-  {
-    name: "金针菇蒸鳊鱼",
-    category: "菜", time: "15分钟", steps: 3, method: "清蒸",
-    ingredients: ["鳊鱼1条", "金针菇1把", "姜丝", "葱丝", "盐少许", "蒸鱼豉油少许"],
-    instructions: ["鳊鱼洗净划刀抹盐铺姜丝", "金针菇洗净铺盘底，放上鳊鱼", "上锅蒸8-10分钟，倒掉腥水，撒葱丝淋豉油"],
-    tip: "金针菇垫底吸收鱼汁，荤素搭配"
-  },
-  {
-    name: "南瓜泥",
-    category: "主食", time: "15分钟", steps: 2, method: "蒸",
-    ingredients: ["南瓜300g"],
-    instructions: ["南瓜去皮去籽切块", "上锅蒸15分钟，取出压成泥"],
-    tip: "南瓜本身很甜，什么调料都不用加"
-  },
-  {
-    name: "丝瓜炒蛋白",
-    category: "菜", time: "8分钟", steps: 2, method: "清炒",
-    ingredients: ["丝瓜1根", "鸡蛋2个（只用蛋白）", "盐少许", "油少许"],
-    instructions: ["丝瓜去皮切滚刀块，蛋白打散", "少许油炒蛋白盛出，再炒丝瓜至变软透明，倒回蛋白翻匀加盐"],
-    tip: "丝瓜水分多，不要炒太久"
-  },
-  {
-    name: "牛肉末蒸蛋",
-    category: "菜", time: "20分钟", steps: 3, method: "清蒸",
-    ingredients: ["鸡蛋2个", "牛肉80g", "西兰花50g", "姜末", "盐少许"],
-    instructions: ["牛肉剁末加姜末盐拌匀", "鸡蛋打散加温水搅匀撇沫", "西兰花焯水切碎，与牛肉末一起铺碗底，倒入蛋液蒸12分钟"],
-    tip: "西兰花增加膳食纤维，牛肉选里脊最嫩"
-  },
-  {
-    name: "藕粉羹",
-    category: "主食", time: "5分钟", steps: 1, method: "冲调",
-    ingredients: ["无糖藕粉2勺", "开水适量"],
-    instructions: ["藕粉加少量凉水调匀，冲入滚烫开水，边冲边搅至透明"],
-    tip: "先凉水调开再冲开水，才不会结块。适合睡前加餐"
-  },
-  {
-    name: "白萝卜肉丸汤",
-    category: "菜", time: "25分钟", steps: 3, method: "煮",
-    ingredients: ["白萝卜200g", "猪里脊150g", "姜末", "葱花", "盐少许"],
-    instructions: ["里脊肉剁成茸，加姜末和少许盐搅上劲", "白萝卜去皮切薄片", "水烧开转小火，用勺子挖肉丸入锅，加萝卜片，煮12分钟，加盐撒葱花"],
-    tip: "肉丸要小火定型，大火会散"
-  },
-  {
-    name: "冬瓜虾仁汤",
-    category: "菜", time: "12分钟", steps: 3, method: "煮",
-    ingredients: ["冬瓜200g", "虾仁80g", "姜丝", "盐少许", "葱花", "香油几滴"],
-    instructions: ["冬瓜去皮切薄片，虾仁洗净", "水烧开加姜丝和冬瓜煮5分钟至透明", "放入虾仁煮2分钟，加盐和香油撒葱花"],
-    tip: "虾仁鲜美，冬瓜清淡，容易吞咽"
-  },
-  {
-    name: "茼蒿蛋花汤",
-    category: "菜", time: "8分钟", steps: 2, method: "煮",
-    ingredients: ["茼蒿100g", "鸡蛋1个", "姜丝", "盐少许", "香油几滴"],
-    instructions: ["茼蒿洗净切段，鸡蛋打散", "水烧开加姜丝和茼蒿煮2分钟，淋蛋花，加盐和香油"],
-    tip: "茼蒿清香开胃，煮软易嚼"
-  },
-  {
-    name: "鸡胸肉蒸山药",
-    category: "菜", time: "25分钟", steps: 3, method: "清蒸",
-    ingredients: ["鸡胸肉150g", "山药200g", "姜丝", "盐少许", "生抽几滴"],
-    instructions: ["鸡胸肉切片，用盐和生抽腌10分钟", "山药去皮切厚片铺盘底", "鸡肉铺在山药上，放姜丝，上锅蒸18分钟"],
-    tip: "鸡肉和山药一起蒸，山药吸收肉汁更香"
-  },
-  {
-    name: "胡萝卜炒里脊",
-    category: "菜", time: "12分钟", steps: 3, method: "清炒",
-    ingredients: ["里脊肉100g", "胡萝卜1根", "姜丝", "盐少许", "油少许"],
-    instructions: ["里脊肉切薄片，胡萝卜去皮切薄片", "少许油先炒肉片至变色盛出", "炒胡萝卜至软，倒回肉片翻匀加盐"],
-    tip: "胡萝卜切薄易熟，甜甜的老人喜欢"
-  },
-  {
-    name: "白菜肉末粉丝煲",
-    category: "菜", time: "15分钟", steps: 3, method: "煮",
-    ingredients: ["大白菜3片", "里脊肉80g", "粉丝1小把", "姜末", "盐少许", "生抽几滴"],
-    instructions: ["白菜切块，粉丝温水泡软", "里脊肉剁末加姜末盐生抽拌匀", "白菜铺锅底加水，铺上肉末和粉丝，煮10分钟"],
-    tip: "粉丝软滑好嚼，白菜清甜"
-  },
-  {
-    name: "冬瓜肉末羹",
-    category: "菜", time: "15分钟", steps: 3, method: "煮",
-    ingredients: ["冬瓜200g", "里脊肉80g", "姜末", "盐少许", "水淀粉少许"],
-    instructions: ["冬瓜去皮切小丁，里脊肉剁末", "水烧开放姜末和冬瓜丁煮8分钟", "放入肉末搅散煮2分钟，水淀粉勾薄芡，加盐"],
-    tip: "冬瓜软烂入口即化"
-  },
-  {
-    name: "上海青炒肉片",
-    category: "菜", time: "10分钟", steps: 3, method: "清炒",
-    ingredients: ["上海青3-4棵", "里脊肉100g", "姜丝", "盐少许", "油少许"],
-    instructions: ["上海青洗净切段，里脊肉切薄片", "少许油炒肉片至变色盛出", "爆香姜丝炒上海青至软，倒回肉片翻匀加盐"],
-    tip: "先炒梗再放叶，肉片薄切才嫩"
-  },
-  {
-    name: "鱼肠秋葵蒸蛋",
-    category: "菜", time: "12分钟", steps: 2, method: "清蒸",
-    ingredients: ["鸡蛋2个", "鱼肠1根", "秋葵2根", "温水适量", "盐少许"],
-    instructions: ["鱼肠切小段，秋葵切薄片", "鸡蛋打散加温水和盐搅匀，放入鱼肠和秋葵", "上锅蒸10分钟"],
-    tip: "秋葵切片像星星，好看又营养"
-  },
-  {
-    name: "西兰花炒鸡茸",
-    category: "菜", time: "12分钟", steps: 3, method: "清炒",
-    ingredients: ["西兰花半颗", "鸡胸肉80g", "姜末", "盐少许", "油少许"],
-    instructions: ["西兰花掰小朵焯水2分钟至软", "鸡胸肉剁茸，少许油炒散", "加入西兰花翻炒均匀，加盐"],
-    tip: "西兰花焯水后要煮软，方便老人咀嚼"
-  },
-  {
-    name: "山药红枣粥",
-    category: "主食", time: "25分钟", steps: 2, method: "煮",
-    ingredients: ["大米半杯", "山药150g", "红枣3-4颗（去皮去核）"],
-    instructions: ["大米洗净，山药去皮切小块，红枣撕碎", "所有材料加水大火煮开转小火熬20分钟"],
-    tip: "红枣要去皮，皮不易消化"
-  },
-  {
-    name: "嫩豆腐蒸肉末",
-    category: "菜", time: "15分钟", steps: 3, method: "清蒸",
-    ingredients: ["嫩豆腐1盒", "里脊肉80g", "姜末", "葱花", "盐少许", "生抽几滴"],
-    instructions: ["嫩豆腐倒扣在盘中，用刀划几道", "里脊肉剁末，加姜末、盐、生抽拌匀", "肉末铺在豆腐上，上锅蒸10分钟，出锅撒葱花"],
-    tip: "嫩豆腐含水量高，蒸完会出水，刚好浇饭"
-  },
-  {
-    name: "生菜鱼片汤",
-    category: "菜", time: "8分钟", steps: 3, method: "煮",
-    ingredients: ["生菜1棵", "鲈鱼片100g", "姜丝", "盐少许", "香油几滴"],
-    instructions: ["生菜洗净撕成小片，鱼片用少许盐抓一下", "水烧开加姜丝，放入鱼片煮1分钟", "放入生菜烫30秒，加盐和香油出锅"],
-    tip: "生菜最后放烫一下就好，鱼片嫩滑"
-  },
-  {
-    name: "香菇蒸蛋",
-    category: "菜", time: "12分钟", steps: 2, method: "清蒸",
-    ingredients: ["鸡蛋2个", "鲜香菇2朵", "温水适量", "盐少许", "香油几滴"],
-    instructions: ["香菇洗净去蒂切薄片", "鸡蛋打散加温水和盐搅匀，放入香菇片", "上锅蒸10分钟，淋香油"],
-    tip: "香菇增鲜，老人喜欢那个嚼劲"
-  },
-  {
-    name: "金针菇蒸鸡胸",
-    category: "菜", time: "15分钟", steps: 3, method: "清蒸",
-    ingredients: ["鸡胸肉150g", "金针菇1把", "姜丝", "盐少许", "生抽几滴"],
-    instructions: ["鸡胸肉切薄片，用盐和生抽腌10分钟", "金针菇洗净铺盘底", "鸡肉铺在金针菇上，放姜丝，上锅蒸10分钟"],
-    tip: "金针菇切短一些，方便老人嚼"
-  },
-  {
-    name: "胡萝卜山药排骨汤",
-    category: "菜", time: "40分钟", steps: 3, method: "煮",
-    ingredients: ["排骨200g", "胡萝卜1根", "山药150g", "姜3片", "盐少许"],
-    instructions: ["排骨焯水去血沫，洗净", "胡萝卜去皮切滚刀块，山药去皮切段", "排骨姜片加水大火煮开转小火炖30分钟，加入胡萝卜山药再炖10分钟，加盐"],
-    tip: "汤面上的浮油要撇干净"
-  },
-  {
-    name: "番茄鸡蛋肉末羹",
-    category: "菜", time: "12分钟", steps: 3, method: "煮",
-    ingredients: ["番茄1个", "鸡蛋1个", "里脊肉60g", "盐少许", "水淀粉少许", "油少许"],
-    instructions: ["番茄去皮切小丁，里脊肉剁末", "少许油炒番茄至出汁，加水烧开", "放入肉末搅散煮2分钟，淋蛋花，加盐勾薄芡"],
-    tip: "番茄开胃，肉末补充蛋白质"
-  },
-  {
-    name: "平菇炒肉片",
-    category: "菜", time: "10分钟", steps: 3, method: "清炒",
-    ingredients: ["平菇200g", "里脊肉100g", "姜丝", "盐少许", "油少许"],
-    instructions: ["平菇撕小朵焯水1分钟，里脊肉切薄片", "少许油炒肉片至变色", "加入平菇翻炒2分钟，加盐"],
-    tip: "平菇焯水去掉土味，口感更滑"
-  },
-  {
-    name: "花菜炒肉末",
-    category: "菜", time: "12分钟", steps: 3, method: "清炒",
-    ingredients: ["花菜半颗", "里脊肉80g", "姜末", "盐少许", "油少许"],
-    instructions: ["花菜掰小朵焯水3分钟至软，里脊肉剁末", "少许油炒肉末至变色", "加入花菜翻炒均匀，加盐"],
-    tip: "花菜一定要煮到筷子能轻松戳穿"
-  },
-  {
-    name: "土豆鸡肉饼",
-    category: "菜", time: "20分钟", steps: 3, method: "蒸",
-    ingredients: ["土豆200g", "鸡胸肉100g", "盐少许", "姜末"],
-    instructions: ["土豆去皮蒸熟压成泥，鸡胸肉剁茸", "土豆泥和鸡肉茸加姜末盐拌匀", "做成小饼状，上锅蒸10分钟"],
-    tip: "做小一点，方便老人一口一个"
-  },
-  {
-    name: "萝卜丝鲫鱼汤",
-    category: "菜", time: "25分钟", steps: 3, method: "煮",
-    ingredients: ["鲫鱼1条", "白萝卜150g", "姜3片", "葱段", "盐少许"],
-    instructions: ["鲫鱼洗净，白萝卜去皮擦丝", "锅中少许油，姜片爆香，鲫鱼两面略煎", "加足量开水，放入萝卜丝，大火煮12分钟至汤白，加盐撒葱"],
-    tip: "滤掉鱼刺再给老人喝汤"
-  },
-  {
-    name: "蛋花粥",
-    category: "主食", time: "25分钟", steps: 2, method: "煮",
-    ingredients: ["大米半杯", "鸡蛋1个", "姜丝", "盐少许", "香油几滴"],
-    instructions: ["大米洗净加水熬粥20分钟", "鸡蛋打散，粥快好时淋入搅成蛋花，加盐和香油"],
-    tip: "最简单的早餐粥，配一道蒸菜刚好"
-  },
-  {
-    name: "里脊肉蒸娃娃菜",
-    category: "菜", time: "15分钟", steps: 3, method: "清蒸",
-    ingredients: ["娃娃菜2棵", "里脊肉100g", "姜丝", "盐少许", "生抽几滴"],
-    instructions: ["娃娃菜洗净对半切开铺盘底", "里脊肉切片，用盐和生抽腌5分钟", "肉片铺在娃娃菜上，放姜丝，上锅蒸10分钟"],
-    tip: "娃娃菜蒸完甜软多汁"
-  },
-  {
-    name: "山药炖鸡",
-    category: "菜", time: "35分钟", steps: 3, method: "炖",
-    ingredients: ["鸡腿1个（去皮）", "山药200g", "姜3片", "盐少许"],
-    instructions: ["鸡腿去皮切块焯水去血沫", "山药去皮切滚刀块", "鸡块加姜片和水，大火煮开转小火炖25分钟，加山药再炖10分钟，加盐"],
-    tip: "鸡皮必须去掉，减少油脂"
-  },
-  {
-    name: "藕片蒸肉",
-    category: "菜", time: "20分钟", steps: 3, method: "清蒸",
-    ingredients: ["藕1节", "里脊肉100g", "姜末", "盐少许", "生抽几滴"],
-    instructions: ["藕去皮切薄片，里脊肉剁末加姜末盐生抽拌匀", "藕片铺盘底", "肉末均匀铺在藕片上，上锅蒸15分钟"],
-    tip: "藕片切薄，蒸完粉糯"
-  },
-  {
-    name: "番茄鱼片汤",
-    category: "菜", time: "20分钟", steps: 3, method: "煮",
-    ingredients: ["鲈鱼片150g", "番茄1个", "姜丝", "盐少许", "葱花"],
-    instructions: ["鲈鱼片用少许盐腌5分钟，番茄去皮切小块", "少许油炒番茄至出汁，加水烧开", "放入鱼片和姜丝煮3分钟，加盐撒葱花"],
-    tip: "鱼片不要煮太久，变色即可"
-  },
-  {
-    name: "青菜肉末粥",
-    category: "主食", time: "25分钟", steps: 3, method: "煮",
-    ingredients: ["大米半杯", "里脊肉60g", "上海青2棵", "姜丝", "盐少许"],
-    instructions: ["大米洗净加水熬粥20分钟", "上海青切碎末，里脊肉剁末", "粥快好时放入肉末搅散煮2分钟，加入青菜末煮1分钟，加盐"],
-    tip: "青菜最后放，保持一点绿色更好看"
-  },
-  {
-    name: "南瓜虾仁羹",
-    category: "菜", time: "15分钟", steps: 3, method: "煮",
-    ingredients: ["南瓜200g", "虾仁60g", "姜丝", "盐少许"],
-    instructions: ["南瓜去皮切小丁，虾仁切小段", "水烧开放南瓜丁煮至软烂（约10分钟）", "放入虾仁煮2分钟，加盐，用勺子压碎部分南瓜让汤变稠"],
-    tip: "南瓜天然甜味，虾仁增添鲜味"
-  },
-  {
-    name: "冬瓜炖里脊",
-    category: "菜", time: "25分钟", steps: 3, method: "炖",
-    ingredients: ["冬瓜300g", "里脊肉150g", "姜3片", "盐少许", "葱花"],
-    instructions: ["冬瓜去皮切大块，里脊肉切厚片", "里脊肉加姜片和水大火煮开，撇去浮沫转小火炖15分钟", "加入冬瓜再炖10分钟至透明，加盐撒葱花"],
-    tip: "冬瓜不要切太小，否则炖化了"
-  },
-  {
-    name: "鸡蛋面线",
-    category: "主食", time: "10分钟", steps: 2, method: "煮",
-    ingredients: ["面线1把", "鸡蛋1个", "葱花", "盐少许", "香油几滴"],
-    instructions: ["水烧开下面线煮2分钟，打入鸡蛋搅散", "加盐和香油，撒葱花出锅"],
-    tip: "面线细软易消化，煮的时间不要太长"
-  },
-  {
-    name: "鸡茸西葫芦",
-    category: "菜", time: "12分钟", steps: 3, method: "清炒",
-    ingredients: ["西葫芦1根", "鸡胸肉80g", "姜末", "盐少许", "油少许"],
-    instructions: ["西葫芦切薄片，鸡胸肉剁茸", "少许油炒鸡茸至变色", "加入西葫芦翻炒至变软透明，加盐"],
-    tip: "鸡茸比鸡片更嫩，适合老人"
-  },
-  {
-    name: "山药肉末盅",
-    category: "菜", time: "25分钟", steps: 3, method: "清蒸",
-    ingredients: ["山药200g", "里脊肉100g", "姜末", "盐少许", "生抽几滴"],
-    instructions: ["山药去皮切小段挖个小窝（不要挖穿）", "里脊肉剁末加姜末盐生抽拌匀", "肉末填入山药窝中，上锅蒸20分钟"],
-    tip: "造型好看能增进食欲"
-  },
-  {
-    name: "软馄饨",
-    category: "主食", time: "15分钟", steps: 3, method: "煮",
-    ingredients: ["馄饨皮10张", "里脊肉150g", "姜末", "葱花", "盐少许", "香油几滴"],
-    instructions: ["里脊肉剁茸，加姜末、葱花、盐、香油调馅", "包小馄饨（馅少皮薄）", "水开下馄饨，煮至浮起再煮2分钟即可"],
-    tip: "馅不要太多，小小一个刚好一口。汤里加点紫菜更鲜"
-  },
-  {
-    name: "西葫芦肉末汤",
-    category: "菜", time: "10分钟", steps: 3, method: "煮",
-    ingredients: ["西葫芦1根", "里脊肉80g", "姜末", "盐少许", "香油几滴"],
-    instructions: ["西葫芦切丁，里脊肉剁末", "水烧开加姜末和西葫芦煮3分钟", "放入肉末搅散煮2分钟，加盐和香油"],
-    tip: "西葫芦软嫩，肉末易消化"
-  },
-  {
-    name: "白萝卜炖牛肉",
-    category: "菜", time: "50分钟", steps: 3, method: "炖",
-    ingredients: ["牛里脊200g", "白萝卜200g", "姜4片", "盐少许", "葱花"],
-    instructions: ["牛肉切小块焯水去血沫，白萝卜去皮切滚刀块", "牛肉加姜片和水大火煮开转小火炖40分钟", "加入白萝卜再炖10分钟，加盐撒葱花"],
-    tip: "牛肉一定要炖到筷子能轻松戳穿，时间不够就多炖一会"
-  },
-  {
-    name: "南瓜蒸蛋",
-    category: "菜", time: "15分钟", steps: 3, method: "清蒸",
-    ingredients: ["小南瓜1个", "鸡蛋1个", "温水适量", "盐少许"],
-    instructions: ["小南瓜顶部切开做盖子，挖去瓜瓤", "鸡蛋打散加温水和盐搅匀，倒入南瓜中", "盖上南瓜盖，上锅蒸15分钟"],
-    tip: "南瓜本身甜，鸡蛋也很嫩，连南瓜肉一起吃"
-  },
-  {
-    name: "丝瓜鱼片汤",
-    category: "菜", time: "12分钟", steps: 2, method: "煮",
-    ingredients: ["丝瓜1根", "鲈鱼片100g", "姜丝", "盐少许", "香油几滴"],
-    instructions: ["丝瓜去皮切滚刀块，鱼片用少许盐抓一下", "水烧开加姜丝和丝瓜煮3分钟，放入鱼片煮2分钟，加盐和香油"],
-    tip: "鱼片薄切，入锅即熟"
-  },
-  {
-    name: "山药小米糕",
-    category: "主食", time: "25分钟", steps: 3, method: "蒸",
-    ingredients: ["山药200g", "小米粉100g", "温水适量"],
-    instructions: ["山药去皮蒸熟压成泥", "山药泥加入小米粉和温水揉成面团", "分成小份压扁，上锅蒸12分钟"],
-    tip: "无糖无油，山药自带黏性所以能成型"
-  },
-  {
-    name: "萝卜丝炒鸡蛋",
-    category: "菜", time: "8分钟", steps: 2, method: "清炒",
-    ingredients: ["白萝卜200g", "鸡蛋2个", "盐少许", "油少许"],
-    instructions: ["白萝卜去皮擦丝，鸡蛋打散加盐", "少许油先炒鸡蛋盛出，再炒萝卜丝至软，倒回鸡蛋翻匀"],
-    tip: "萝卜丝炒软后清甜，搭配鸡蛋营养好"
-  },
-  {
-    name: "里脊肉蒸山药",
-    category: "菜", time: "20分钟", steps: 3, method: "清蒸",
-    ingredients: ["山药200g", "里脊肉100g", "姜丝", "盐少许", "生抽几滴"],
-    instructions: ["山药去皮切厚片铺盘底", "里脊肉切薄片用盐生抽腌5分钟", "肉片铺在山药上，加姜丝，上锅蒸15分钟"],
-    tip: "山药垫底吸收肉汁，很好吃"
-  },
-  {
-    name: "菠菜猪肝粥",
-    category: "主食", time: "25分钟", steps: 3, method: "煮",
-    ingredients: ["大米半杯", "猪肝80g", "菠菜50g", "姜丝", "盐少许"],
-    instructions: ["大米洗净加水熬粥20分钟", "猪肝切薄片泡水10分钟去血水，菠菜切碎", "粥快好时放入猪肝煮2分钟，加菠菜煮1分钟，加盐"],
-    tip: "猪肝补铁，但要切薄煮透。每月吃1-2次即可"
-  },
-  {
-    name: "红薯泥",
-    category: "主食", time: "20分钟", steps: 2, method: "蒸",
-    ingredients: ["红薯300g（选红心）", "温水少许"],
-    instructions: ["红薯去皮切块，上锅蒸20分钟至筷子轻松穿透", "趁热用勺子压成泥，太干加少许温水调匀"],
-    tip: "红心红薯更甜更软，不需要加任何调料"
-  },
-  {
-    name: "鸡肉碎米粥",
-    category: "主食", time: "30分钟", steps: 3, method: "煮",
-    ingredients: ["大米半杯", "鸡胸肉100g", "胡萝卜半根", "姜丝", "盐少许"],
-    instructions: ["大米洗净加水熬粥20分钟，期间搅拌防粘锅", "鸡胸肉剁成细茸，胡萝卜擦细丝", "粥快好时加入鸡茸和胡萝卜丝，搅散煮5分钟，加盐"],
-    tip: "鸡茸提前用少许水调开再下锅，不会结块"
-  },
-  {
-    name: "紫薯山药糊",
-    category: "主食", time: "25分钟", steps: 2, method: "蒸",
-    ingredients: ["紫薯150g", "山药150g", "温水适量"],
-    instructions: ["紫薯和山药分别去皮切块，上锅蒸20分钟", "蒸好后一起放入碗中，加少量温水，用勺子压成糊状"],
-    tip: "紫薯偏干，压泥时多加点温水调到能流动的稠度"
-  },
-  {
-    name: "烂糊面",
-    category: "主食", time: "10分钟", steps: 2, method: "煮",
-    ingredients: ["细挂面1把", "鸡蛋1个", "上海青2棵", "盐少许", "香油几滴"],
-    instructions: ["水烧开下面条煮3分钟至软烂", "上海青切细末放入，鸡蛋打散淋入搅成蛋花，加盐和香油"],
-    tip: "面条煮到筷子一夹就断的程度，老人吃起来不费力"
-  },
-  {
-    name: "鱼肉青菜粥",
-    category: "主食", time: "25分钟", steps: 3, method: "煮",
-    ingredients: ["大米半杯", "鲈鱼肉80g", "上海青2棵", "姜丝", "盐少许"],
-    instructions: ["大米洗净加水熬粥20分钟", "鲈鱼肉去皮去刺切小片，上海青切碎末", "粥快好时放入鱼片和姜丝煮3分钟，加青菜末煮1分钟，加盐"],
-    tip: "鱼肉一定要检查干净没有刺再下锅"
-  },
-  {
-    name: "玉米鸡蛋糊",
-    category: "主食", time: "8分钟", steps: 2, method: "煮",
-    ingredients: ["玉米面粉3勺", "鸡蛋1个", "水适量", "盐少许"],
-    instructions: ["玉米面粉加少量凉水调成糊状（无颗粒）", "锅中水烧开转小火，边倒玉米糊边搅拌，煮3分钟后淋入蛋花，加盐"],
-    tip: "一定要先凉水调开再下锅，否则全是疙瘩"
-  },
-  {
-    name: "碎肉蒸软饭",
-    category: "主食", time: "25分钟", steps: 3, method: "蒸",
-    ingredients: ["大米半杯", "里脊肉80g", "胡萝卜半根", "姜末", "盐少许", "生抽几滴"],
-    instructions: ["大米洗净加水（比平时煮饭多一点，约1:2.5）", "里脊肉剁成细末，加姜末盐生抽拌匀，胡萝卜切细末", "肉末和胡萝卜铺在米上，一起上锅蒸25分钟"],
-    tip: "水比正常米饭多，蒸出来更软烂"
-  },
-  {
-    name: "红枣桂圆小米粥",
-    category: "主食", time: "25分钟", steps: 2, method: "煮",
-    ingredients: ["小米半杯", "红枣4颗（去皮去核）", "桂圆肉6-8颗"],
-    instructions: ["小米淘净，红枣去皮去核撕碎，桂圆肉洗净", "所有材料加水大火煮开转小火熬20分钟"],
-    tip: "红枣皮不易消化一定要去掉，桂圆自带甜味不用加糖"
-  },
-  {
-    name: "鸡汤烂面",
-    category: "主食", time: "15分钟", steps: 3, method: "煮",
-    ingredients: ["细挂面1把", "鸡胸肉80g", "娃娃菜3片", "姜丝", "盐少许"],
-    instructions: ["鸡胸肉切薄片，娃娃菜切细丝", "水烧开加姜丝和鸡肉片煮5分钟成简易鸡汤", "下面条和娃娃菜丝煮3分钟至软烂，加盐"],
-    tip: "面条吸饱了鸡汤的味道，不用额外加调料就很鲜"
-  },
-  {
-    name: "凉拌萝卜丝",
-    category: "菜", time: "5分钟", steps: 2, method: "凉拌",
-    ingredients: ["白萝卜200g", "盐少许", "生抽半勺", "醋几滴", "香油2滴"],
-    instructions: ["白萝卜去皮擦细丝，撒少许盐抓匀腌5分钟，挤掉出水", "加生抽、醋、香油拌匀即可"],
-    tip: "盐少放，萝卜自带清甜。比市售咸菜健康得多，配粥刚好"
-  },
-  {
-    name: "蒜泥黄瓜",
-    category: "菜", time: "5分钟", steps: 2, method: "凉拌",
-    ingredients: ["黄瓜1根", "蒜1瓣（捣泥）", "生抽半勺", "醋几滴", "香油2滴"],
-    instructions: ["黄瓜洗净拍碎切段", "蒜捣成泥，加生抽、醋、香油调成汁，淋在黄瓜上拌匀"],
-    tip: "蒜少放一点提味即可，不要太多刺激肠胃。天热吃着特别清爽"
-  },
-  {
-    name: "水煮花生",
-    category: "菜", time: "30分钟", steps: 2, method: "煮",
-    ingredients: ["生花生米100g", "八角1颗", "盐少许"],
-    instructions: ["花生米洗净，加水和八角", "大火煮开转小火煮25分钟至软面，加少许盐浸泡10分钟入味"],
-    tip: "一次多煮一些，冷藏能吃两三天。比油炸花生健康太多"
-  },
-  {
-    name: "酱黄豆",
-    category: "菜", time: "20分钟", steps: 2, method: "煮",
-    ingredients: ["干黄豆100g（提前泡一晚）", "生抽1勺", "老抽几滴", "冰糖2小颗"],
-    instructions: ["泡好的黄豆加水煮15分钟至软", "加生抽、老抽、冰糖，小火收汁至将干即可"],
-    tip: "少放酱油和糖，比市售酱菜清淡很多。黄豆蛋白质丰富，补钙"
-  },
-  {
-    name: "凉拌海带丝",
-    category: "菜", time: "8分钟", steps: 2, method: "凉拌",
-    ingredients: ["干海带丝20g", "蒜1瓣（捣泥）", "生抽半勺", "醋几滴", "香油2滴"],
-    instructions: ["海带丝温水泡发，开水焯1分钟捞出过凉", "加蒜泥、生抽、醋、香油拌匀"],
-    tip: "海带丝富含碘和膳食纤维，泡发后一定要焯水去掉腥味"
-  },
-  {
-    name: "蒸咸鸭蛋",
-    category: "菜", time: "10分钟", steps: 1, method: "蒸",
-    ingredients: ["咸鸭蛋1个"],
-    instructions: ["咸鸭蛋冷水上锅，水开后蒸8分钟，取出对半切开"],
-    tip: "咸鸭蛋盐分高，一次最多半个，配粥吃刚好。蛋白咸蛋黄香，老人最爱"
-  }
-];
-
-
-var staples = recipes.filter(function(r) { return r.category === '主食'; });
-var dishes = recipes.filter(function(r) { return r.category === '菜'; });
-
-var mealState = {
-  '早': { stapleIdx: -1, dishIdx: -1, stapleHistory: [], dishHistory: [] },
-  '午': { stapleIdx: -1, dishIdx: -1, stapleHistory: [], dishHistory: [] },
-  '晚': { stapleIdx: -1, dishIdx: -1, stapleHistory: [], dishHistory: [] }
-};
-
-function getMeal(recipe) {
-  var n = recipe.name;
-  if (recipe.category === '主食') {
-    if (/粥|糊|羹|粉/.test(n)) return ['早','晚'];
-    return ['午','晚'];
-  }
-  if (/蛋羹|蒸蛋|豆腐|凉拌|酱|咸蛋|花生/.test(n)) return ['早','午','晚'];
-  if (/汤/.test(n)) return ['午','晚'];
-  return ['午','晚'];
-}
-
-function filterForMeal(list, meal) {
-  return list.filter(function(r) { return getMeal(r).indexOf(meal) !== -1; });
-}
-
-var INGREDIENT_MAP = {
-  '南瓜': '南瓜', '山药': '山药', '胡萝卜': '胡萝卜', '菠菜': '菠菜',
-  '冬瓜': '冬瓜', '西葫芦': '西葫芦', '白萝卜': '萝卜', '萝卜丝': '萝卜',
-  '丝瓜': '丝瓜', '土豆': '土豆', '鸡': '鸡肉', '猪肝': '猪肝',
-  '里脊': '猪肉', '肉末': '猪肉', '肉片': '猪肉', '肉丸': '猪肉', '肉饼': '猪肉',
-  '排骨': '猪肉', '牛肉': '牛肉', '虾仁': '虾', '鱼肠': '鱼',
-  '鸡蛋': '蛋', '蛋花': '蛋', '蒸蛋': '蛋', '蛋白': '蛋',
-  '豆腐': '豆腐', '小米': '小米', '大米': '大米',
-  '藕粉': '藕', '藕片': '藕', '金针菇': '菇', '平菇': '菇', '香菇': '菇',
-  '西兰花': '西兰花', '花菜': '花菜', '娃娃菜': '白菜', '大白菜': '白菜', '白菜': '白菜',
-  '番茄': '番茄', '上海青': '青菜', '青菜': '青菜', '生菜': '青菜', '茼蒿': '青菜',
-  '鲈鱼': '鱼', '鲫鱼': '鱼', '鳊鱼': '鱼', '鱼片': '鱼', '鱼肉': '鱼',
-  '秋葵': '秋葵', '红薯': '薯', '紫薯': '薯',
-  '面线': '面', '面条': '面', '挂面': '面', '馄饨': '面',
-  '粉丝': '粉丝', '红枣': '红枣', '桂圆': '桂圆',
-  '莲子': '莲子', '银耳': '银耳', '百合': '百合', '玉米': '玉米'
-};
-
-function getKeyIngredients(recipe) {
-  var keys = [];
-  var n = recipe.name;
-  for (var k in INGREDIENT_MAP) {
-    if (n.indexOf(k) !== -1) keys.push(INGREDIENT_MAP[k]);
-  }
-  return keys;
-}
-
-function hasConflict(a, b) {
-  var aKeys = getKeyIngredients(a);
-  var bKeys = getKeyIngredients(b);
-  for (var i = 0; i < aKeys.length; i++) {
-    if (bKeys.indexOf(aKeys[i]) !== -1) return true;
-  }
-  return false;
-}
-
-function findCompatiblePair(stapleList, dishList, sIdx, dIdx) {
-  var staple = stapleList[sIdx];
-  var dish = dishList[dIdx];
-  if (!hasConflict(staple, dish)) return { staple: staple, dish: dish, sIdx: sIdx, dIdx: dIdx };
-  for (var i = 0; i < dishList.length; i++) {
-    if (i !== dIdx && !hasConflict(staple, dishList[i]))
-      return { staple: staple, dish: dishList[i], sIdx: sIdx, dIdx: i };
-  }
-  for (var j = 0; j < stapleList.length; j++) {
-    if (j !== sIdx && !hasConflict(stapleList[j], dish))
-      return { staple: stapleList[j], dish: dish, sIdx: j, dIdx: dIdx };
-  }
-  return { staple: staple, dish: dish, sIdx: sIdx, dIdx: dIdx };
-}
-
-function getDifficulty(recipe) {
-  if (recipe.steps <= 1 || recipe.method === '冲调') return '★';
-  if (recipe.steps === 2 && (recipe.method === '蒸' || recipe.method === '煮')) return '★★';
-  return '★★★';
-}
-
-function getNutritionTags(recipe) {
-  var tags = [];
-  var n = recipe.name;
-  var ing = recipe.ingredients.join('');
-  if (/鸡|鱼|虾|肉|蛋|豆腐|牛肉|猪肝/.test(n)) tags.push({ cls: 'protein', label: '高蛋白' });
-  if (/粥|糊|羹|泥|蒸蛋|豆腐|汤/.test(n) && recipe.method !== '清炒' && recipe.method !== '炖') tags.push({ cls: 'digest', label: '易消化' });
-  if (/猪肝|菠菜|红枣/.test(n)) tags.push({ cls: 'iron', label: '补铁' });
-  if (/西兰花|花菜|菠菜|白菜|青菜|秋葵|胡萝卜|芹菜|茼蒿|金针菇|平菇|香菇|南瓜/.test(n)) tags.push({ cls: 'fiber', label: '高纤维' });
-  if (/豆腐|虾|排骨|鲫鱼|银耳/.test(n)) tags.push({ cls: 'calcium', label: '补钙' });
-  if (/牛肉|猪里脊|鸡胸|鲈鱼|蛋白|蒸/.test(n) && !/排骨/.test(n) && !/五花/.test(ing)) tags.push({ cls: 'lowfat', label: '低脂' });
-  return tags.slice(0, 3);
-}
-
-function trySwap(list, history, todayIdx, otherRecipe) {
-  if (history.length >= list.length - 1) return null;
-  var idx, attempts = 0;
-  do {
-    idx = Math.floor(Math.random() * list.length);
-    attempts++;
-  } while (attempts < 200 && (idx === todayIdx || history.indexOf(idx) !== -1 ||
-            (otherRecipe && hasConflict(list[idx], otherRecipe))));
-  return { idx: idx, recipe: list[idx] };
-}
-
-function getTodayIndex(list) {
-  var now = new Date();
-  var start = new Date(now.getFullYear(), 0, 0);
-  var dayOfYear = Math.floor((now - start) / 86400000);
-  return dayOfYear % list.length;
-}
-
-function renderCompact(meal, staple, dish) {
-  var el = document.getElementById('compact-' + meal);
-  if (!el) return;
-  var sStars = getDifficulty(staple);
-  var sTagStr = getNutritionTags(staple).map(function(t) { return t.label; }).join(' · ');
-  var dStars = getDifficulty(dish);
-  var dTagStr = getNutritionTags(dish).map(function(t) { return t.label; }).join(' · ');
-  el.innerHTML =
-    '<div class="meal-item">' +
-      '<span class="item-cat staple">主食</span>' +
-      '<span class="item-name">' + staple.name + '</span>' +
-      '<span class="item-meta">' +
-        '<span class="meta-time">' + staple.time + '</span><span class="sep">·</span>' +
-        '<span class="meta-steps">' + staple.steps + '步</span><span class="sep">·</span>' +
-        '<span class="meta-method">' + staple.method + '</span><span class="sep">·</span>' +
-        '<span class="meta-stars">' + sStars + '</span>' +
-        (sTagStr ? '<span class="sep">·</span>' + sTagStr : '') +
-      '</span>' +
-    '</div>' +
-    '<div class="meal-item">' +
-      '<span class="item-cat dish">菜品</span>' +
-      '<span class="item-name">' + dish.name + '</span>' +
-      '<span class="item-meta">' +
-        '<span class="meta-time">' + dish.time + '</span><span class="sep">·</span>' +
-        '<span class="meta-steps">' + dish.steps + '步</span><span class="sep">·</span>' +
-        '<span class="meta-method">' + dish.method + '</span><span class="sep">·</span>' +
-        '<span class="meta-stars">' + dStars + '</span>' +
-        (dTagStr ? '<span class="sep">·</span>' + dTagStr : '') +
-      '</span>' +
-    '</div>';
-}
-
-function renderDetail(meal, staple, dish) {
-  var el = document.getElementById('detail-' + meal);
-  if (!el) return;
-  var html = '';
-  [['staple-card', staple, '🥄'], ['dish-card', dish, '🍽️']].forEach(function(item) {
-    var cls = item[0], r = item[1], icon = item[2];
-    html += '<div class="detail-card ' + cls + '">';
-    html += '<div class="detail-title">' + icon + ' ' + r.name + '</div>';
-    html += '<div class="detail-ingredients">';
-    for (var i = 0; i < r.ingredients.length; i++) {
-      html += '<span class="ingredient-tag">' + r.ingredients[i] + '</span> ';
-    }
-    html += '</div><ol class="detail-steps">';
-    for (var j = 0; j < r.instructions.length; j++) {
-      html += '<li><span class="detail-step-num">' + (j+1) + '</span>' + r.instructions[j] + '</li>';
-    }
-    html += '</ol>';
-    if (r.tip) html += '<div class="detail-tip">💡 ' + r.tip + '</div>';
-    html += '</div>';
-  });
-  el.innerHTML = html;
-}
-
-function toggleMeal(meal) {
-  var detail = document.getElementById('detail-' + meal);
-  var toggle = document.getElementById('toggle-' + meal);
-  if (!detail || !toggle) return;
-  if (detail.classList.contains('hidden')) {
-    var state = mealState[meal];
-    if (!detail.innerHTML.trim()) renderDetail(meal, state.staple, state.dish);
-    detail.classList.remove('hidden');
-    toggle.textContent = '▴ 收起做法';
-  } else {
-    detail.classList.add('hidden');
-    toggle.textContent = '▾ 查看做法';
-  }
-}
-
-function swapMeal(meal, type) {
-  var state = mealState[meal];
-  var avail = filterForMeal(type === 'staple' ? staples : dishes, meal);
-  var history = type === 'staple' ? state.stapleHistory : state.dishHistory;
-  var todayIdx = type === 'staple' ? state.stapleIdx : state.dishIdx;
-  var otherRecipe = type === 'staple' ? state.dish : state.staple;
-  var result = trySwap(avail, history, todayIdx, otherRecipe);
-
-  if (!result) {
-    var row = document.querySelector('.meal-row[data-meal="' + meal + '"]');
-    if (row) {
-      var btns = row.querySelectorAll('.btn-meal-swap');
-      for (var b = 0; b < btns.length; b++) {
-        if (btns[b].textContent.indexOf(type === 'staple' ? '主食' : '菜品') !== -1) {
-          btns[b].disabled = true; btns[b].textContent = '已全部';
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>每日菜谱</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+
+      :root {
+        --color-bg: #ffffff;
+        --color-surface: #ffffff;
+        --color-text: #2d1b0e;
+        --color-text-secondary: #6b5240;
+        --color-primary: #8b6bae;
+        --color-primary-light: #d4c4e8;
+        --color-primary-bg: #f6f2fa;
+        --color-accent: #5b8a72;
+        --color-accent-light: #d4e8dc;
+        --color-accent-bg: #f0f7f3;
+        --color-warm: #9b7ec4;
+        --color-warm-light: #f3eef8;
+        --color-tip-bg: #fff8ed;
+        --color-tip-border: #d4a853;
+        --color-divider: #e8ddd0;
+        --shadow-sm: 0 1px 2px rgba(45, 27, 14, 0.05);
+        --shadow-md: 0 2px 6px rgba(45, 27, 14, 0.08);
+        --shadow-lg: 0 4px 12px rgba(45, 27, 14, 0.1);
+        --radius-lg: 14px;
+        --radius-md: 10px;
+        --radius-sm: 8px;
+      }
+
+      html,
+      body {
+        min-height: 100vh;
+      }
+
+      body {
+        font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+        background: var(--color-bg);
+        color: var(--color-text);
+        padding: 6px 8px;
+        font-size: 18px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .container {
+        width: 100%;
+        max-width: none;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      /* ===== Reminder Card ===== */
+      .reminder-card {
+        background: linear-gradient(135deg, #ebf4ff 0%, #f5f9ff 100%);
+        border-radius: var(--radius-md);
+        padding: 6px 20px;
+        box-shadow: var(--shadow-md);
+        border: 2px solid #a3c9f7;
+        text-align: center;
+      }
+      .reminder-text {
+        font-size: 28px;
+        font-weight: 700;
+        color: #2b6cb0;
+        line-height: 1.3;
+      }
+      .reminder-sub {
+        font-size: 22px;
+        font-weight: 500;
+        color: #4a8bc2;
+        line-height: 1.3;
+        margin-top: 4px;
+      }
+
+      /* ===== Diet Note ===== */
+      .diet-note {
+        background: linear-gradient(135deg, #fff5f5 0%, #fff0f0 100%);
+        border: 1px solid #f5c6cb;
+        border-radius: var(--radius-sm);
+        padding: 4px 14px;
+        font-size: 15px;
+        color: #a94442;
+        text-align: center;
+        font-weight: 500;
+        letter-spacing: 1px;
+      }
+
+      /* ===== Snack (加餐) ===== */
+      .snack-row {
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+        background: linear-gradient(135deg, #fff8ee 0%, #fffdf7 100%);
+        border: 1.5px dashed #e8c876;
+        border-radius: var(--radius-sm);
+        padding: 6px 14px;
+      }
+      .snack-time {
+        font-size: 17px;
+        font-weight: 700;
+        color: #b8860b;
+        flex-shrink: 0;
+      }
+      .snack-main {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--color-text);
+      }
+      .snack-opt {
+        font-size: 14px;
+        color: var(--color-text-secondary);
+      }
+
+      /* ===== Dinner Tip (晚上难受怎么避免) ===== */
+      .dinner-tip {
+        margin: 0 12px 8px;
+        background: #f4f5fb;
+        border: 1px solid #c5cce6;
+        border-radius: var(--radius-sm);
+        padding: 6px 12px;
+      }
+      .dinner-tip-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #4a5899;
+        margin-bottom: 2px;
+      }
+      .dinner-tip-list {
+        margin: 0;
+        padding-left: 20px;
+        list-style: disc;
+      }
+      .dinner-tip-list li {
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--color-text-secondary);
+      }
+      .dinner-tip-list strong {
+        color: #4a5899;
+      }
+
+      /* ===== Meal Rows ===== */
+      .meals-section {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .meal-row {
+        background: var(--color-surface);
+        border-radius: var(--radius-md);
+        border: 2px solid var(--color-divider);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        transition: border-color 0.2s;
+      }
+      .meal-row.current {
+        box-shadow: var(--shadow-md);
+      }
+
+      /* Breakfast: warm amber */
+      .meal-breakfast {
+        border-color: #e8c876;
+      }
+      .meal-breakfast .meal-header {
+        background: #fffbf0;
+      }
+      .meal-breakfast.current {
+        border-color: #d4a017;
+        border-width: 2.5px;
+      }
+      .meal-breakfast.current .meal-header {
+        background: #fff3cd;
+        border-bottom-color: #e8c876;
+      }
+
+      /* Lunch: fresh green */
+      .meal-lunch {
+        border-color: #8fbc8f;
+      }
+      .meal-lunch .meal-header {
+        background: #f4faf6;
+      }
+      .meal-lunch.current {
+        border-color: #5b8a72;
+        border-width: 2.5px;
+      }
+      .meal-lunch.current .meal-header {
+        background: #d4e8dc;
+        border-bottom-color: #8fbc8f;
+      }
+
+      /* Dinner: calm indigo */
+      .meal-dinner {
+        border-color: #9ba4c9;
+      }
+      .meal-dinner .meal-header {
+        background: #f4f5fb;
+      }
+      .meal-dinner.current {
+        border-color: #6b7db3;
+        border-width: 2.5px;
+      }
+      .meal-dinner.current .meal-header {
+        background: #d8ddf0;
+        border-bottom-color: #9ba4c9;
+      }
+
+      .meal-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-bottom: 1px solid var(--color-divider);
+      }
+
+      .meal-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+      }
+
+      .meal-label {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--color-text);
+        flex: 1;
+      }
+
+      .meal-actions {
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+
+      .btn-meal-swap {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        padding: 3px 10px;
+        font-size: 14px;
+        font-family: inherit;
+        font-weight: 600;
+        border: 1px solid var(--color-divider);
+        border-radius: var(--radius-sm);
+        background: var(--color-surface);
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+      .btn-meal-swap:hover {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+        background: var(--color-primary-bg);
+      }
+      .btn-meal-swap:active {
+        transform: scale(0.96);
+      }
+      .btn-meal-swap:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+
+      .meal-compact {
+        padding: 6px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .meal-item {
+        display: grid;
+        grid-template-columns: 2.8em 1fr 4.5em 2.6em 2.5em 3.2em 1fr;
+        column-gap: 5px;
+        align-items: center;
+        font-size: 17px;
+        line-height: 1.4;
+      }
+
+      .item-cat {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 1px 6px;
+        border-radius: 100px;
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+      .item-cat.staple {
+        background: var(--color-primary);
+        color: #fff;
+      }
+      .item-cat.dish {
+        background: var(--color-accent);
+        color: #fff;
+      }
+      .item-cat.fixed {
+        background: #e8a92b;
+        color: #fff;
+      }
+
+      .item-caution {
+        font-size: 13px;
+        font-weight: 700;
+        color: #a94442;
+        background: #fff0f0;
+        border: 1px solid #f5c6cb;
+        border-radius: 100px;
+        padding: 0 6px;
+        white-space: nowrap;
+      }
+
+      .item-name {
+        font-weight: 700;
+        color: var(--color-text);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+      }
+
+      .item-meta {
+        display: contents;
+      }
+      .item-meta .sep {
+        display: none;
+      }
+
+      .meta-time {
+        text-align: right;
+        white-space: nowrap;
+        font-size: 14px;
+        color: var(--color-text-secondary);
+      }
+      .meta-steps {
+        text-align: right;
+        white-space: nowrap;
+        font-size: 14px;
+        color: var(--color-text-secondary);
+      }
+      .meta-method {
+        text-align: center;
+        white-space: nowrap;
+        font-size: 14px;
+        color: var(--color-text-secondary);
+      }
+      .meta-stars {
+        text-align: left;
+        white-space: nowrap;
+        font-size: 14px;
+        color: var(--color-text-secondary);
+      }
+
+      /* Expand Toggle */
+      .expand-toggle {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 4px;
+        font-size: 14px;
+        font-family: inherit;
+        font-weight: 500;
+        color: var(--color-primary);
+        background: none;
+        border: none;
+        border-top: 1px dashed var(--color-divider);
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .expand-toggle:hover {
+        background: var(--color-primary-bg);
+      }
+
+      /* Detail Section */
+      .meal-detail {
+        border-top: 1px solid var(--color-divider);
+        padding: 8px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .detail-card {
+        border-radius: var(--radius-sm);
+        padding: 6px 8px;
+        border: 1px solid var(--color-divider);
+      }
+      .detail-card.staple-card {
+        background: #f3eef8;
+        border-color: rgba(155, 126, 196, 0.2);
+      }
+      .detail-card.dish-card {
+        background: #edf5f0;
+        border-color: rgba(91, 138, 114, 0.2);
+      }
+
+      .detail-card .detail-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 3px;
+      }
+      .detail-card .detail-ingredients {
+        font-size: 15px;
+        color: var(--color-text);
+        margin-bottom: 4px;
+        line-height: 1.5;
+      }
+      .detail-card .detail-steps {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .detail-card .detail-steps li {
+        display: flex;
+        align-items: flex-start;
+        gap: 5px;
+        padding: 2px 0;
+        font-size: 15px;
+        color: var(--color-text);
+        line-height: 1.5;
+      }
+      .detail-card .detail-steps li + li {
+        border-top: 1px dashed var(--color-divider);
+      }
+      .detail-card .detail-step-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        font-size: 11px;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-top: 2px;
+      }
+      .detail-card.staple-card .detail-step-num {
+        background: var(--color-primary);
+        color: #fff;
+      }
+      .detail-card.dish-card .detail-step-num {
+        background: var(--color-accent);
+        color: #fff;
+      }
+
+      .detail-card .detail-tip {
+        margin-top: 4px;
+        font-size: 14px;
+        color: var(--color-text-secondary);
+        padding: 3px 6px;
+        border-radius: var(--radius-sm);
+        line-height: 1.4;
+      }
+      .detail-card.staple-card .detail-tip {
+        background: #f8f4fc;
+        border-left: 3px solid #9b7ec4;
+      }
+      .detail-card.dish-card .detail-tip {
+        background: #edf7f2;
+        border-left: 3px solid #5b8a72;
+      }
+
+      /* ===== Meal Indicator ===== */
+      .meal-indicator {
+        text-align: center;
+        font-size: 34px;
+        font-weight: 700;
+        color: var(--color-primary);
+        padding: 2px 0 0;
+        line-height: 1.3;
+      }
+
+      /* ===== Recipe Grid ===== */
+      .recipe-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+
+      /* ===== Column Card ===== */
+      .recipe-column {
+        background: var(--color-surface);
+        border-radius: var(--radius-md);
+        border: 2px solid var(--color-divider);
+        box-shadow: var(--shadow-lg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .col-header {
+        padding: 5px 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+      #col-staple .col-header {
+        background: linear-gradient(135deg, var(--color-primary-bg) 0%, var(--color-surface) 100%);
+        border-bottom: 2px solid var(--color-primary-light);
+      }
+      #col-dish .col-header {
+        background: linear-gradient(135deg, var(--color-accent-bg) 0%, var(--color-surface) 100%);
+        border-bottom: 2px solid var(--color-accent-light);
+      }
+
+      .col-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 15px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 100px;
+        flex-shrink: 0;
+      }
+      .col-badge svg {
+        width: 10px;
+        height: 10px;
+      }
+      #col-staple .col-badge {
+        background: var(--color-primary);
+        color: #fff;
+      }
+      #col-dish .col-badge {
+        background: var(--color-accent);
+        color: #fff;
+      }
+
+      .col-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--color-text);
+        line-height: 1.2;
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .btn-swap {
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        padding: 3px 8px;
+        font-size: 16px;
+        font-family: inherit;
+        font-weight: 600;
+        border: 1px solid var(--color-divider);
+        border-radius: var(--radius-sm);
+        background: var(--color-surface);
+        color: var(--color-text-secondary);
+        cursor: pointer;
+        transition: all 0.15s ease;
+        flex-shrink: 0;
+        min-width: 36px;
+        min-height: 28px;
+      }
+      .btn-swap:hover {
+        border-color: var(--color-primary);
+        color: var(--color-primary);
+        background: var(--color-primary-bg);
+      }
+      .btn-swap:active {
+        transform: scale(0.96);
+      }
+      .btn-swap:focus-visible {
+        outline: 2px solid var(--color-primary);
+        outline-offset: 1px;
+      }
+      .btn-swap:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      .btn-swap svg {
+        width: 12px;
+        height: 12px;
+      }
+
+      /* Meta Row */
+      .meta-row {
+        display: flex;
+        gap: 4px;
+        padding: 4px 10px;
+        flex-shrink: 0;
+      }
+      .meta-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 15px;
+        color: var(--color-text-secondary);
+        background: var(--color-bg);
+        padding: 1px 5px;
+        border-radius: 100px;
+      }
+      .meta-item svg {
+        width: 10px;
+        height: 10px;
+        flex-shrink: 0;
+      }
+
+      /* Tag Row */
+      .tag-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 2px 10px;
+        flex-shrink: 0;
+        flex-wrap: wrap;
+      }
+      .difficulty-stars {
+        font-size: 17px;
+        letter-spacing: 1px;
+        flex-shrink: 0;
+      }
+      .nutrition-tag {
+        display: inline-block;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 1px 5px;
+        border-radius: 100px;
+        flex-shrink: 0;
+        line-height: 1.4;
+      }
+      .nutrition-tag.protein {
+        background: #fff0f0;
+        color: #c0392b;
+        border: 1px solid #f5c6cb;
+      }
+      .nutrition-tag.digest {
+        background: #f0f9f4;
+        color: #1e7e34;
+        border: 1px solid #c3e6cb;
+      }
+      .nutrition-tag.iron {
+        background: #fff8ee;
+        color: #b85c00;
+        border: 1px solid #f5d6b0;
+      }
+      .nutrition-tag.fiber {
+        background: #eef9ee;
+        color: #2e7d32;
+        border: 1px solid #b7dfb9;
+      }
+      .nutrition-tag.calcium {
+        background: #f0f4ff;
+        color: #1a5276;
+        border: 1px solid #b8cff5;
+      }
+      .nutrition-tag.lowfat {
+        background: #f5f8fa;
+        color: #5d6d7e;
+        border: 1px solid #d5dbdb;
+      }
+
+      /* Content Sections */
+      .col-body {
+        padding: 0 8px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .section-block {
+        border-radius: var(--radius-sm);
+        padding: 5px 7px;
+      }
+      .ingredients-block {
+        background: var(--color-warm-light);
+        border: 1px solid rgba(201, 169, 110, 0.3);
+        flex-shrink: 0;
+      }
+      #col-dish .ingredients-block {
+        background: #edf5f0;
+        border-color: rgba(91, 138, 114, 0.2);
+      }
+      #col-staple .ingredients-block {
+        background: #f3eef8;
+        border-color: rgba(155, 126, 196, 0.2);
+      }
+
+      .section-label {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--color-text);
+        margin-bottom: 2px;
+      }
+      .section-label svg {
+        width: 11px;
+        height: 11px;
+      }
+      #col-staple .section-label svg {
+        color: var(--color-warm);
+      }
+      #col-dish .section-label svg {
+        color: var(--color-accent);
+      }
+
+      .ingredients-text {
+        font-size: 16px;
+        color: var(--color-text);
+        line-height: 1.6;
+      }
+      .ingredient-tag {
+        display: inline-block;
+        background: var(--color-surface);
+        padding: 0px 4px;
+        border-radius: 4px;
+        margin: 1px 2px;
+        border: 1px solid var(--color-divider);
+        font-size: 15px;
+      }
+
+      /* Instructions */
+      .instructions-block {
+        background: var(--color-surface);
+        border: 1px solid var(--color-divider);
+      }
+      .instructions-list {
+        list-style: none;
+        padding: 0;
+      }
+      .instructions-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 5px;
+        padding: 3px 0;
+        font-size: 16px;
+        color: var(--color-text);
+        line-height: 1.5;
+      }
+      .instructions-list li + li {
+        border-top: 1px dashed var(--color-divider);
+      }
+      .step-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        font-size: 12px;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      #col-staple .step-num {
+        background: var(--color-primary);
+        color: #fff;
+      }
+      #col-dish .step-num {
+        background: var(--color-accent);
+        color: #fff;
+      }
+      .step-text {
+        flex: 1;
+      }
+
+      /* Tip */
+      .tip-block {
+        background: var(--color-tip-bg);
+        border: 1px solid rgba(212, 168, 83, 0.3);
+        border-left: 3px solid var(--color-tip-border);
+        display: flex;
+        align-items: flex-start;
+        gap: 4px;
+        padding: 4px 6px;
+        flex-shrink: 0;
+      }
+      .tip-block svg {
+        width: 12px;
+        height: 12px;
+        color: var(--color-tip-border);
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
+      #col-staple .tip-block {
+        background: #f8f4fc;
+        border: 1px solid rgba(155, 126, 196, 0.25);
+        border-left: 3px solid #9b7ec4;
+      }
+      #col-staple .tip-block svg {
+        color: #9b7ec4;
+      }
+      #col-dish .tip-block {
+        background: #edf7f2;
+        border: 1px solid rgba(91, 138, 114, 0.2);
+        border-left: 3px solid #5b8a72;
+      }
+      #col-dish .tip-block svg {
+        color: #5b8a72;
+      }
+      .tip-text {
+        font-size: 15px;
+        color: var(--color-text-secondary);
+        line-height: 1.5;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
         }
       }
-    }
-    return;
-  }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Reminder -->
+      <div id="reminder-section" class="hidden">
+        <div class="reminder-card">
+          <div id="reminder-text" class="reminder-text">冰箱有酸奶</div>
+          <div id="reminder-sub" class="reminder-sub">冰柜南瓜泥切小块，装袋放冰柜</div>
+        </div>
+      </div>
 
-  history.push(result.idx);
-  if (type === 'staple') { state.stapleIdx = result.idx; state.staple = result.recipe; }
-  else { state.dishIdx = result.idx; state.dish = result.recipe; }
-  renderCompact(meal, state.staple, state.dish);
-  var detail = document.getElementById('detail-' + meal);
-  if (detail && !detail.classList.contains('hidden')) renderDetail(meal, state.staple, state.dish);
-}
+      <!-- Diet Note -->
+      <div class="diet-note">🥄 胰腺友好：低脂少油 · 少食多餐 · 晚餐清淡 · 趁热吃</div>
 
-function hasReminder() {
-  var el = document.getElementById('reminder-text');
-  return el && el.textContent.trim().length > 0;
-}
+      <!-- Meals -->
+      <div class="meals-section">
+        <div class="meal-row" data-meal="早">
+          <div class="meal-header">
+            <span class="meal-icon">🥣</span>
+            <span class="meal-label">早餐</span>
+            <div class="meal-actions">
+              <button class="btn-meal-swap" onclick="swapMeal('早', 'staple')">换主食</button>
+              <button class="btn-meal-swap" onclick="swapMeal('早', 'dish')">换菜品</button>
+            </div>
+          </div>
+          <div class="meal-compact" id="compact-早"></div>
+          <button class="expand-toggle" id="toggle-早" onclick="toggleMeal('早')">▾ 查看做法</button>
+          <div class="meal-detail hidden" id="detail-早"></div>
+        </div>
 
-function getCurrentMeal() {
-  var h = new Date().getHours();
-  if (h >= 5 && h < 10) return '早';
-  if (h >= 10 && h < 14) return '午';
-  return '晚';
-}
+        <div class="snack-row">
+          <span class="snack-time">⏰ 上午 10:00</span>
+          <span class="snack-main">佳膳悠选 1 杯</span>
+          <span class="snack-opt">＋可选：酸奶 1 杯（不喜牛奶可代替，常温放 10 分钟再吃，别冰）</span>
+        </div>
 
-function init() {
-  if (hasReminder()) {
-    document.getElementById('reminder-section').classList.remove('hidden');
-    document.title = '今日叮嘱';
-  } else {
-    document.getElementById('reminder-section').classList.add('hidden');
-  }
+        <div class="meal-row" data-meal="午">
+          <div class="meal-header">
+            <span class="meal-icon">🍚</span>
+            <span class="meal-label">午餐</span>
+            <div class="meal-actions">
+              <button class="btn-meal-swap" onclick="swapMeal('午', 'staple')">换主食</button>
+              <button class="btn-meal-swap" onclick="swapMeal('午', 'dish')">换菜品</button>
+            </div>
+          </div>
+          <div class="meal-compact" id="compact-午"></div>
+          <button class="expand-toggle" id="toggle-午" onclick="toggleMeal('午')">▾ 查看做法</button>
+          <div class="meal-detail hidden" id="detail-午"></div>
+        </div>
 
-  var meals = ['早', '午', '晚'];
-  var currentMeal = getCurrentMeal();
-  var mealClasses = { '早': 'meal-breakfast', '午': 'meal-lunch', '晚': 'meal-dinner' };
+        <div class="snack-row">
+          <span class="snack-time">⏰ 下午 15:00</span>
+          <span class="snack-main">佳膳悠选 1 杯</span>
+          <span class="snack-opt">＋可选：少量软水果 / 苏打饼干，离晚餐 2 小时以上</span>
+        </div>
 
-  for (var m = 0; m < meals.length; m++) {
-    var meal = meals[m];
-    var availStaples = filterForMeal(staples, meal);
-    var availDishes = filterForMeal(dishes, meal);
-    var sIdx = getTodayIndex(availStaples);
-    var dIdx = getTodayIndex(availDishes);
-    var pair = findCompatiblePair(availStaples, availDishes, sIdx, dIdx);
-    var state = mealState[meal];
-    state.staple = pair.staple;
-    state.dish = pair.dish;
-    state.stapleIdx = pair.sIdx;
-    state.dishIdx = pair.dIdx;
-    state.stapleHistory = [pair.sIdx];
-    state.dishHistory = [pair.dIdx];
-    renderCompact(meal, pair.staple, pair.dish);
+        <div class="meal-row" data-meal="晚">
+          <div class="meal-header">
+            <span class="meal-icon">🌙</span>
+            <span class="meal-label">晚餐</span>
+            <div class="meal-actions">
+              <button class="btn-meal-swap" onclick="swapMeal('晚', 'staple')">换主食</button>
+              <button class="btn-meal-swap" onclick="swapMeal('晚', 'dish')">换菜品</button>
+            </div>
+          </div>
+          <div class="meal-compact" id="compact-晚"></div>
+          <div class="dinner-tip">
+            <div class="dinner-tip-title">🌙 晚上难受怎么避免</div>
+            <ul class="dinner-tip-list">
+              <li>晚餐<strong>七分饱、要吃早</strong>，睡前 3 小时吃完</li>
+              <li><strong>少油、少盐、不吃生冷</strong>，排骨/咸蛋/花生留到白天</li>
+              <li>饭后<strong>慢走 10 分钟</strong>，不要马上躺下</li>
+              <li>睡觉<strong>垫高枕头</strong>，减少反流烧心</li>
+              <li>有胰酶（如得每通）<strong>随餐按医嘱吃</strong>，别漏</li>
+            </ul>
+          </div>
+          <button class="expand-toggle" id="toggle-晚" onclick="toggleMeal('晚')">▾ 查看做法</button>
+          <div class="meal-detail hidden" id="detail-晚"></div>
+        </div>
+      </div>
+    </div>
 
-    var row = document.querySelector('.meal-row[data-meal="' + meal + '"]');
-    if (row) {
-      row.classList.add(mealClasses[meal]);
-      if (meal === currentMeal) row.classList.add('current');
-    }
-  }
-}
+    <script>
+      var recipes = [
+        {
+          name: '清蒸鲈鱼配山药泥',
+          category: '菜',
+          time: '15分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['鲈鱼1条', '山药200g', '姜丝', '葱花', '盐少许', '香油几滴'],
+          instructions: ['鲈鱼洗净，鱼身划两刀，铺姜丝，上锅蒸8分钟', '山药去皮切块，同时蒸15分钟，取出捣成泥', '鱼出锅撒葱花、淋少许香油，山药泥铺底装盘'],
+          tip: '鲈鱼刺少肉嫩，容易消化，适合术后食用',
+        },
+        {
+          name: '菠菜鸡蛋羹',
+          category: '菜',
+          time: '12分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['鸡蛋2个', '菠菜50g', '温水（鸡蛋的1.5倍）', '盐少许', '香油几滴'],
+          instructions: ['鸡蛋打散，加入温水和少许盐搅匀', '菠菜焯水后挤干切碎末，撒入蛋液中拌匀', '撇去泡沫，上锅蒸8-10分钟，出锅淋香油'],
+          tip: '菠菜碎和蛋液一起蒸，一步到位有菜有蛋白',
+        },
+        {
+          name: '山药排骨蒸蛋',
+          category: '菜',
+          time: '25分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['排骨150g', '山药100g', '鸡蛋1个', '姜2片', '盐少许'],
+          instructions: ['排骨冷水下锅焯去血沫，捞出洗净', '山药去皮切滚刀块，与排骨一起放入碗中', '打入鸡蛋，加少许水和盐，上锅蒸20分钟'],
+          tip: '排骨选小排，肉嫩易嚼',
+        },
+        {
+          name: '胡萝卜鸡茸粥',
+          category: '主食',
+          time: '30分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['大米半杯', '鸡胸肉80g', '胡萝卜半根', '姜丝', '盐少许'],
+          instructions: ['大米洗净加水，大火煮开后转小火熬20分钟', '鸡胸肉剁成茸，胡萝卜擦细丝', '粥快好时加入鸡茸和胡萝卜丝，搅散煮5分钟，加盐调味'],
+          tip: '鸡茸入锅后要快速搅散，防止结块',
+        },
+        {
+          name: '冬瓜蒸肉末',
+          category: '菜',
+          time: '20分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['冬瓜300g', '猪里脊肉100g', '姜末', '盐少许', '生抽几滴'],
+          instructions: ['冬瓜去皮切厚片，铺在盘底', '里脊肉剁成末，加姜末、少许盐和生抽拌匀', '肉末铺在冬瓜上，上锅蒸15分钟'],
+          tip: '冬瓜本身出水，蒸的时候不用额外加水',
+        },
+        {
+          name: '软烂小米粥',
+          category: '主食',
+          time: '25分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['小米半杯', '水6杯', '南瓜100g（可选）'],
+          instructions: ['小米淘洗干净，南瓜去皮切小丁', '小米和南瓜一起加水，大火煮开转小火熬20分钟至粘稠'],
+          tip: '小米粥养胃易消化，可作早餐',
+        },
+        {
+          name: '白萝卜鲫鱼汤',
+          category: '菜',
+          time: '30分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['鲫鱼1条', '白萝卜200g', '姜3片', '葱段', '盐少许'],
+          instructions: ['鲫鱼洗净，白萝卜去皮切薄片', '锅中放少许油，姜片爆香，鲫鱼两面略煎', '加足量开水，放入白萝卜片，大火煮15分钟至汤白，加盐和葱花'],
+          tip: '加开水是汤白的关键，不要加冷水',
+        },
+        {
+          name: '西葫芦炒鸡蛋',
+          category: '菜',
+          time: '10分钟',
+          steps: 2,
+          method: '清炒',
+          ingredients: ['西葫芦1根', '鸡蛋2个', '盐少许', '油少许'],
+          instructions: ['西葫芦切薄片，鸡蛋打散加少许盐', '锅中少许油，先炒鸡蛋盛出，再炒西葫芦至软，倒回鸡蛋翻匀'],
+          tip: '西葫芦炒软即可，不要炒出水',
+        },
+        {
+          name: '土豆泥',
+          category: '主食',
+          time: '20分钟',
+          steps: 2,
+          method: '蒸',
+          ingredients: ['土豆2个（约300g）', '盐少许'],
+          instructions: ['土豆去皮切块，上锅蒸20分钟至筷子轻松穿透', '趁热用勺子压成泥，加少许盐拌匀即可'],
+          tip: '可做主食替代米饭，也可以当加餐',
+        },
+        {
+          name: '娃娃菜豆腐汤',
+          category: '菜',
+          time: '10分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['娃娃菜1棵', '嫩豆腐半块', '姜丝', '盐少许', '香油几滴'],
+          instructions: ['娃娃菜洗净切段，嫩豆腐切小块', '水烧开，放入姜丝和娃娃菜煮3分钟，加入豆腐再煮2分钟，加盐和香油'],
+          tip: '清淡爽口，豆腐补充植物蛋白',
+        },
+        {
+          name: '南瓜小米粥',
+          category: '主食',
+          time: '25分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['小米半杯', '南瓜200g', '水适量'],
+          instructions: ['小米淘净，南瓜去皮切小丁', '一起加水大火煮开转小火熬20分钟'],
+          tip: '南瓜自带甜味，无需加糖',
+        },
+        {
+          name: '鸡茸豆腐羹',
+          category: '菜',
+          time: '15分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['鸡胸肉80g', '嫩豆腐半块', '鸡蛋清1个', '姜末', '盐少许', '水淀粉少许'],
+          instructions: ['鸡胸肉剁茸，豆腐捏碎', '水烧开加姜末，放入鸡茸搅散', '加入豆腐碎，淋蛋清搅成蛋花，少许水淀粉勾薄芡，加盐'],
+          tip: '勾薄芡让口感更滑嫩',
+        },
+        {
+          name: '胡萝卜蒸肉末',
+          category: '菜',
+          time: '15分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['胡萝卜1根', '里脊肉100g', '姜末', '盐少许'],
+          instructions: ['胡萝卜去皮擦细丝铺盘底', '里脊肉剁末加姜末盐拌匀', '肉末铺在胡萝卜丝上，上锅蒸12分钟'],
+          tip: '肉末汁渗入胡萝卜丝，清甜又营养',
+        },
+        {
+          name: '里脊肉片粥',
+          category: '主食',
+          time: '30分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['大米半杯', '猪里脊100g', '姜丝', '盐少许', '葱花'],
+          instructions: ['大米洗净加水熬粥20分钟', '里脊肉切薄片，用少许盐和姜丝腌5分钟', '粥快好时放入肉片搅散煮3分钟，撒葱花'],
+          tip: '肉片切得越薄越嫩',
+        },
+        {
+          name: '山药泥',
+          category: '主食',
+          time: '20分钟',
+          steps: 2,
+          method: '蒸',
+          ingredients: ['山药300g', '盐少许（可选）'],
+          instructions: ['山药去皮切段，上锅蒸20分钟', '趁热用勺子压成泥即可'],
+          tip: '可做加餐或主食替代，山药带皮蒸更香',
+        },
+        {
+          name: '菠菜蛋花汤',
+          category: '菜',
+          time: '8分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['菠菜100g', '鸡蛋1个', '姜丝', '盐少许', '香油几滴'],
+          instructions: ['菠菜洗净切段，鸡蛋打散', '水烧开放姜丝和菠菜煮2分钟，淋入蛋花，加盐和香油'],
+          tip: '菠菜要先煮软，方便老人咀嚼',
+        },
+        {
+          name: '金针菇蒸鳊鱼',
+          category: '菜',
+          time: '15分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['鳊鱼1条', '金针菇1把', '姜丝', '葱丝', '盐少许', '蒸鱼豉油少许'],
+          instructions: ['鳊鱼洗净划刀抹盐铺姜丝', '金针菇洗净铺盘底，放上鳊鱼', '上锅蒸8-10分钟，倒掉腥水，撒葱丝淋豉油'],
+          tip: '金针菇垫底吸收鱼汁，荤素搭配',
+        },
+        {
+          name: '南瓜泥',
+          category: '主食',
+          time: '15分钟',
+          steps: 2,
+          method: '蒸',
+          ingredients: ['南瓜300g'],
+          instructions: ['南瓜去皮去籽切块', '上锅蒸15分钟，取出压成泥'],
+          tip: '南瓜本身很甜，什么调料都不用加',
+        },
+        {
+          name: '丝瓜炒蛋白',
+          category: '菜',
+          time: '8分钟',
+          steps: 2,
+          method: '清炒',
+          ingredients: ['丝瓜1根', '鸡蛋2个（只用蛋白）', '盐少许', '油少许'],
+          instructions: ['丝瓜去皮切滚刀块，蛋白打散', '少许油炒蛋白盛出，再炒丝瓜至变软透明，倒回蛋白翻匀加盐'],
+          tip: '丝瓜水分多，不要炒太久',
+        },
+        {
+          name: '牛肉末蒸蛋',
+          category: '菜',
+          time: '20分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['鸡蛋2个', '牛肉80g', '西兰花50g', '姜末', '盐少许'],
+          instructions: ['牛肉剁末加姜末盐拌匀', '鸡蛋打散加温水搅匀撇沫', '西兰花焯水切碎，与牛肉末一起铺碗底，倒入蛋液蒸12分钟'],
+          tip: '西兰花增加膳食纤维，牛肉选里脊最嫩',
+        },
+        {
+          name: '藕粉羹',
+          category: '主食',
+          time: '5分钟',
+          steps: 1,
+          method: '冲调',
+          ingredients: ['无糖藕粉2勺', '开水适量'],
+          instructions: ['藕粉加少量凉水调匀，冲入滚烫开水，边冲边搅至透明'],
+          tip: '先凉水调开再冲开水，才不会结块。适合睡前加餐',
+        },
+        {
+          name: '白萝卜肉丸汤',
+          category: '菜',
+          time: '25分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['白萝卜200g', '猪里脊150g', '姜末', '葱花', '盐少许'],
+          instructions: ['里脊肉剁成茸，加姜末和少许盐搅上劲', '白萝卜去皮切薄片', '水烧开转小火，用勺子挖肉丸入锅，加萝卜片，煮12分钟，加盐撒葱花'],
+          tip: '肉丸要小火定型，大火会散',
+        },
+        {
+          name: '冬瓜虾仁汤',
+          category: '菜',
+          time: '12分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['冬瓜200g', '虾仁80g', '姜丝', '盐少许', '葱花', '香油几滴'],
+          instructions: ['冬瓜去皮切薄片，虾仁洗净', '水烧开加姜丝和冬瓜煮5分钟至透明', '放入虾仁煮2分钟，加盐和香油撒葱花'],
+          tip: '虾仁鲜美，冬瓜清淡，容易吞咽',
+        },
+        {
+          name: '茼蒿蛋花汤',
+          category: '菜',
+          time: '8分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['茼蒿100g', '鸡蛋1个', '姜丝', '盐少许', '香油几滴'],
+          instructions: ['茼蒿洗净切段，鸡蛋打散', '水烧开加姜丝和茼蒿煮2分钟，淋蛋花，加盐和香油'],
+          tip: '茼蒿清香开胃，煮软易嚼',
+        },
+        {
+          name: '鸡胸肉蒸山药',
+          category: '菜',
+          time: '25分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['鸡胸肉150g', '山药200g', '姜丝', '盐少许', '生抽几滴'],
+          instructions: ['鸡胸肉切片，用盐和生抽腌10分钟', '山药去皮切厚片铺盘底', '鸡肉铺在山药上，放姜丝，上锅蒸18分钟'],
+          tip: '鸡肉和山药一起蒸，山药吸收肉汁更香',
+        },
+        {
+          name: '胡萝卜炒里脊',
+          category: '菜',
+          time: '12分钟',
+          steps: 3,
+          method: '清炒',
+          ingredients: ['里脊肉100g', '胡萝卜1根', '姜丝', '盐少许', '油少许'],
+          instructions: ['里脊肉切薄片，胡萝卜去皮切薄片', '少许油先炒肉片至变色盛出', '炒胡萝卜至软，倒回肉片翻匀加盐'],
+          tip: '胡萝卜切薄易熟，甜甜的老人喜欢',
+        },
+        {
+          name: '白菜肉末粉丝煲',
+          category: '菜',
+          time: '15分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['大白菜3片', '里脊肉80g', '粉丝1小把', '姜末', '盐少许', '生抽几滴'],
+          instructions: ['白菜切块，粉丝温水泡软', '里脊肉剁末加姜末盐生抽拌匀', '白菜铺锅底加水，铺上肉末和粉丝，煮10分钟'],
+          tip: '粉丝软滑好嚼，白菜清甜',
+        },
+        {
+          name: '冬瓜肉末羹',
+          category: '菜',
+          time: '15分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['冬瓜200g', '里脊肉80g', '姜末', '盐少许', '水淀粉少许'],
+          instructions: ['冬瓜去皮切小丁，里脊肉剁末', '水烧开放姜末和冬瓜丁煮8分钟', '放入肉末搅散煮2分钟，水淀粉勾薄芡，加盐'],
+          tip: '冬瓜软烂入口即化',
+        },
+        {
+          name: '上海青炒肉片',
+          category: '菜',
+          time: '10分钟',
+          steps: 3,
+          method: '清炒',
+          ingredients: ['上海青3-4棵', '里脊肉100g', '姜丝', '盐少许', '油少许'],
+          instructions: ['上海青洗净切段，里脊肉切薄片', '少许油炒肉片至变色盛出', '爆香姜丝炒上海青至软，倒回肉片翻匀加盐'],
+          tip: '先炒梗再放叶，肉片薄切才嫩',
+        },
+        {
+          name: '鱼肠秋葵蒸蛋',
+          category: '菜',
+          time: '12分钟',
+          steps: 2,
+          method: '清蒸',
+          ingredients: ['鸡蛋2个', '鱼肠1根', '秋葵2根', '温水适量', '盐少许'],
+          instructions: ['鱼肠切小段，秋葵切薄片', '鸡蛋打散加温水和盐搅匀，放入鱼肠和秋葵', '上锅蒸10分钟'],
+          tip: '秋葵切片像星星，好看又营养',
+        },
+        {
+          name: '西兰花炒鸡茸',
+          category: '菜',
+          time: '12分钟',
+          steps: 3,
+          method: '清炒',
+          ingredients: ['西兰花半颗', '鸡胸肉80g', '姜末', '盐少许', '油少许'],
+          instructions: ['西兰花掰小朵焯水2分钟至软', '鸡胸肉剁茸，少许油炒散', '加入西兰花翻炒均匀，加盐'],
+          tip: '西兰花焯水后要煮软，方便老人咀嚼',
+        },
+        {
+          name: '山药红枣粥',
+          category: '主食',
+          time: '25分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['大米半杯', '山药150g', '红枣3-4颗（去皮去核）'],
+          instructions: ['大米洗净，山药去皮切小块，红枣撕碎', '所有材料加水大火煮开转小火熬20分钟'],
+          tip: '红枣要去皮，皮不易消化',
+        },
+        {
+          name: '嫩豆腐蒸肉末',
+          category: '菜',
+          time: '15分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['嫩豆腐1盒', '里脊肉80g', '姜末', '葱花', '盐少许', '生抽几滴'],
+          instructions: ['嫩豆腐倒扣在盘中，用刀划几道', '里脊肉剁末，加姜末、盐、生抽拌匀', '肉末铺在豆腐上，上锅蒸10分钟，出锅撒葱花'],
+          tip: '嫩豆腐含水量高，蒸完会出水，刚好浇饭',
+        },
+        {
+          name: '生菜鱼片汤',
+          category: '菜',
+          time: '8分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['生菜1棵', '鲈鱼片100g', '姜丝', '盐少许', '香油几滴'],
+          instructions: ['生菜洗净撕成小片，鱼片用少许盐抓一下', '水烧开加姜丝，放入鱼片煮1分钟', '放入生菜烫30秒，加盐和香油出锅'],
+          tip: '生菜最后放烫一下就好，鱼片嫩滑',
+        },
+        {
+          name: '香菇蒸蛋',
+          category: '菜',
+          time: '12分钟',
+          steps: 2,
+          method: '清蒸',
+          ingredients: ['鸡蛋2个', '鲜香菇2朵', '温水适量', '盐少许', '香油几滴'],
+          instructions: ['香菇洗净去蒂切薄片', '鸡蛋打散加温水和盐搅匀，放入香菇片', '上锅蒸10分钟，淋香油'],
+          tip: '香菇增鲜，老人喜欢那个嚼劲',
+        },
+        {
+          name: '金针菇蒸鸡胸',
+          category: '菜',
+          time: '15分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['鸡胸肉150g', '金针菇1把', '姜丝', '盐少许', '生抽几滴'],
+          instructions: ['鸡胸肉切薄片，用盐和生抽腌10分钟', '金针菇洗净铺盘底', '鸡肉铺在金针菇上，放姜丝，上锅蒸10分钟'],
+          tip: '金针菇切短一些，方便老人嚼',
+        },
+        {
+          name: '胡萝卜山药排骨汤',
+          category: '菜',
+          time: '40分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['排骨200g', '胡萝卜1根', '山药150g', '姜3片', '盐少许'],
+          instructions: ['排骨焯水去血沫，洗净', '胡萝卜去皮切滚刀块，山药去皮切段', '排骨姜片加水大火煮开转小火炖30分钟，加入胡萝卜山药再炖10分钟，加盐'],
+          tip: '汤面上的浮油要撇干净',
+        },
+        {
+          name: '番茄鸡蛋肉末羹',
+          category: '菜',
+          time: '12分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['番茄1个', '鸡蛋1个', '里脊肉60g', '盐少许', '水淀粉少许', '油少许'],
+          instructions: ['番茄去皮切小丁，里脊肉剁末', '少许油炒番茄至出汁，加水烧开', '放入肉末搅散煮2分钟，淋蛋花，加盐勾薄芡'],
+          tip: '番茄开胃，肉末补充蛋白质',
+        },
+        {
+          name: '平菇炒肉片',
+          category: '菜',
+          time: '10分钟',
+          steps: 3,
+          method: '清炒',
+          ingredients: ['平菇200g', '里脊肉100g', '姜丝', '盐少许', '油少许'],
+          instructions: ['平菇撕小朵焯水1分钟，里脊肉切薄片', '少许油炒肉片至变色', '加入平菇翻炒2分钟，加盐'],
+          tip: '平菇焯水去掉土味，口感更滑',
+        },
+        {
+          name: '花菜炒肉末',
+          category: '菜',
+          time: '12分钟',
+          steps: 3,
+          method: '清炒',
+          ingredients: ['花菜半颗', '里脊肉80g', '姜末', '盐少许', '油少许'],
+          instructions: ['花菜掰小朵焯水3分钟至软，里脊肉剁末', '少许油炒肉末至变色', '加入花菜翻炒均匀，加盐'],
+          tip: '花菜一定要煮到筷子能轻松戳穿',
+        },
+        {
+          name: '土豆鸡肉饼',
+          category: '菜',
+          time: '20分钟',
+          steps: 3,
+          method: '蒸',
+          ingredients: ['土豆200g', '鸡胸肉100g', '盐少许', '姜末'],
+          instructions: ['土豆去皮蒸熟压成泥，鸡胸肉剁茸', '土豆泥和鸡肉茸加姜末盐拌匀', '做成小饼状，上锅蒸10分钟'],
+          tip: '做小一点，方便老人一口一个',
+        },
+        {
+          name: '萝卜丝鲫鱼汤',
+          category: '菜',
+          time: '25分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['鲫鱼1条', '白萝卜150g', '姜3片', '葱段', '盐少许'],
+          instructions: ['鲫鱼洗净，白萝卜去皮擦丝', '锅中少许油，姜片爆香，鲫鱼两面略煎', '加足量开水，放入萝卜丝，大火煮12分钟至汤白，加盐撒葱'],
+          tip: '滤掉鱼刺再给老人喝汤',
+        },
+        {
+          name: '蛋花粥',
+          category: '主食',
+          time: '25分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['大米半杯', '鸡蛋1个', '姜丝', '盐少许', '香油几滴'],
+          instructions: ['大米洗净加水熬粥20分钟', '鸡蛋打散，粥快好时淋入搅成蛋花，加盐和香油'],
+          tip: '最简单的早餐粥，配一道蒸菜刚好',
+        },
+        {
+          name: '里脊肉蒸娃娃菜',
+          category: '菜',
+          time: '15分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['娃娃菜2棵', '里脊肉100g', '姜丝', '盐少许', '生抽几滴'],
+          instructions: ['娃娃菜洗净对半切开铺盘底', '里脊肉切片，用盐和生抽腌5分钟', '肉片铺在娃娃菜上，放姜丝，上锅蒸10分钟'],
+          tip: '娃娃菜蒸完甜软多汁',
+        },
+        {
+          name: '山药炖鸡',
+          category: '菜',
+          time: '35分钟',
+          steps: 3,
+          method: '炖',
+          ingredients: ['鸡腿1个（去皮）', '山药200g', '姜3片', '盐少许'],
+          instructions: ['鸡腿去皮切块焯水去血沫', '山药去皮切滚刀块', '鸡块加姜片和水，大火煮开转小火炖25分钟，加山药再炖10分钟，加盐'],
+          tip: '鸡皮必须去掉，减少油脂',
+        },
+        {
+          name: '藕片蒸肉',
+          category: '菜',
+          time: '20分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['藕1节', '里脊肉100g', '姜末', '盐少许', '生抽几滴'],
+          instructions: ['藕去皮切薄片，里脊肉剁末加姜末盐生抽拌匀', '藕片铺盘底', '肉末均匀铺在藕片上，上锅蒸15分钟'],
+          tip: '藕片切薄，蒸完粉糯',
+        },
+        {
+          name: '番茄鱼片汤',
+          category: '菜',
+          time: '20分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['鲈鱼片150g', '番茄1个', '姜丝', '盐少许', '葱花'],
+          instructions: ['鲈鱼片用少许盐腌5分钟，番茄去皮切小块', '少许油炒番茄至出汁，加水烧开', '放入鱼片和姜丝煮3分钟，加盐撒葱花'],
+          tip: '鱼片不要煮太久，变色即可',
+        },
+        {
+          name: '青菜肉末粥',
+          category: '主食',
+          time: '25分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['大米半杯', '里脊肉60g', '上海青2棵', '姜丝', '盐少许'],
+          instructions: ['大米洗净加水熬粥20分钟', '上海青切碎末，里脊肉剁末', '粥快好时放入肉末搅散煮2分钟，加入青菜末煮1分钟，加盐'],
+          tip: '青菜最后放，保持一点绿色更好看',
+        },
+        {
+          name: '南瓜虾仁羹',
+          category: '菜',
+          time: '15分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['南瓜200g', '虾仁60g', '姜丝', '盐少许'],
+          instructions: ['南瓜去皮切小丁，虾仁切小段', '水烧开放南瓜丁煮至软烂（约10分钟）', '放入虾仁煮2分钟，加盐，用勺子压碎部分南瓜让汤变稠'],
+          tip: '南瓜天然甜味，虾仁增添鲜味',
+        },
+        {
+          name: '冬瓜炖里脊',
+          category: '菜',
+          time: '25分钟',
+          steps: 3,
+          method: '炖',
+          ingredients: ['冬瓜300g', '里脊肉150g', '姜3片', '盐少许', '葱花'],
+          instructions: ['冬瓜去皮切大块，里脊肉切厚片', '里脊肉加姜片和水大火煮开，撇去浮沫转小火炖15分钟', '加入冬瓜再炖10分钟至透明，加盐撒葱花'],
+          tip: '冬瓜不要切太小，否则炖化了',
+        },
+        {
+          name: '鸡蛋面线',
+          category: '主食',
+          time: '10分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['面线1把', '鸡蛋1个', '葱花', '盐少许', '香油几滴'],
+          instructions: ['水烧开下面线煮2分钟，打入鸡蛋搅散', '加盐和香油，撒葱花出锅'],
+          tip: '面线细软易消化，煮的时间不要太长',
+        },
+        {
+          name: '鸡茸西葫芦',
+          category: '菜',
+          time: '12分钟',
+          steps: 3,
+          method: '清炒',
+          ingredients: ['西葫芦1根', '鸡胸肉80g', '姜末', '盐少许', '油少许'],
+          instructions: ['西葫芦切薄片，鸡胸肉剁茸', '少许油炒鸡茸至变色', '加入西葫芦翻炒至变软透明，加盐'],
+          tip: '鸡茸比鸡片更嫩，适合老人',
+        },
+        {
+          name: '山药肉末盅',
+          category: '菜',
+          time: '25分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['山药200g', '里脊肉100g', '姜末', '盐少许', '生抽几滴'],
+          instructions: ['山药去皮切小段挖个小窝（不要挖穿）', '里脊肉剁末加姜末盐生抽拌匀', '肉末填入山药窝中，上锅蒸20分钟'],
+          tip: '造型好看能增进食欲',
+        },
+        {
+          name: '软馄饨',
+          category: '主食',
+          time: '15分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['馄饨皮10张', '里脊肉150g', '姜末', '葱花', '盐少许', '香油几滴'],
+          instructions: ['里脊肉剁茸，加姜末、葱花、盐、香油调馅', '包小馄饨（馅少皮薄）', '水开下馄饨，煮至浮起再煮2分钟即可'],
+          tip: '馅不要太多，小小一个刚好一口。汤里加点紫菜更鲜',
+        },
+        {
+          name: '西葫芦肉末汤',
+          category: '菜',
+          time: '10分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['西葫芦1根', '里脊肉80g', '姜末', '盐少许', '香油几滴'],
+          instructions: ['西葫芦切丁，里脊肉剁末', '水烧开加姜末和西葫芦煮3分钟', '放入肉末搅散煮2分钟，加盐和香油'],
+          tip: '西葫芦软嫩，肉末易消化',
+        },
+        {
+          name: '白萝卜炖牛肉',
+          category: '菜',
+          time: '50分钟',
+          steps: 3,
+          method: '炖',
+          ingredients: ['牛里脊200g', '白萝卜200g', '姜4片', '盐少许', '葱花'],
+          instructions: ['牛肉切小块焯水去血沫，白萝卜去皮切滚刀块', '牛肉加姜片和水大火煮开转小火炖40分钟', '加入白萝卜再炖10分钟，加盐撒葱花'],
+          tip: '牛肉一定要炖到筷子能轻松戳穿，时间不够就多炖一会',
+        },
+        {
+          name: '南瓜蒸蛋',
+          category: '菜',
+          time: '15分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['小南瓜1个', '鸡蛋1个', '温水适量', '盐少许'],
+          instructions: ['小南瓜顶部切开做盖子，挖去瓜瓤', '鸡蛋打散加温水和盐搅匀，倒入南瓜中', '盖上南瓜盖，上锅蒸15分钟'],
+          tip: '南瓜本身甜，鸡蛋也很嫩，连南瓜肉一起吃',
+        },
+        {
+          name: '丝瓜鱼片汤',
+          category: '菜',
+          time: '12分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['丝瓜1根', '鲈鱼片100g', '姜丝', '盐少许', '香油几滴'],
+          instructions: ['丝瓜去皮切滚刀块，鱼片用少许盐抓一下', '水烧开加姜丝和丝瓜煮3分钟，放入鱼片煮2分钟，加盐和香油'],
+          tip: '鱼片薄切，入锅即熟',
+        },
+        {
+          name: '山药小米糕',
+          category: '主食',
+          time: '25分钟',
+          steps: 3,
+          method: '蒸',
+          ingredients: ['山药200g', '小米粉100g', '温水适量'],
+          instructions: ['山药去皮蒸熟压成泥', '山药泥加入小米粉和温水揉成面团', '分成小份压扁，上锅蒸12分钟'],
+          tip: '无糖无油，山药自带黏性所以能成型',
+        },
+        {
+          name: '萝卜丝炒鸡蛋',
+          category: '菜',
+          time: '8分钟',
+          steps: 2,
+          method: '清炒',
+          ingredients: ['白萝卜200g', '鸡蛋2个', '盐少许', '油少许'],
+          instructions: ['白萝卜去皮擦丝，鸡蛋打散加盐', '少许油先炒鸡蛋盛出，再炒萝卜丝至软，倒回鸡蛋翻匀'],
+          tip: '萝卜丝炒软后清甜，搭配鸡蛋营养好',
+        },
+        {
+          name: '里脊肉蒸山药',
+          category: '菜',
+          time: '20分钟',
+          steps: 3,
+          method: '清蒸',
+          ingredients: ['山药200g', '里脊肉100g', '姜丝', '盐少许', '生抽几滴'],
+          instructions: ['山药去皮切厚片铺盘底', '里脊肉切薄片用盐生抽腌5分钟', '肉片铺在山药上，加姜丝，上锅蒸15分钟'],
+          tip: '山药垫底吸收肉汁，很好吃',
+        },
+        {
+          name: '菠菜猪肝粥',
+          category: '主食',
+          time: '25分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['大米半杯', '猪肝80g', '菠菜50g', '姜丝', '盐少许'],
+          instructions: ['大米洗净加水熬粥20分钟', '猪肝切薄片泡水10分钟去血水，菠菜切碎', '粥快好时放入猪肝煮2分钟，加菠菜煮1分钟，加盐'],
+          tip: '猪肝补铁，但要切薄煮透。每月吃1-2次即可',
+        },
+        {
+          name: '红薯泥',
+          category: '主食',
+          time: '20分钟',
+          steps: 2,
+          method: '蒸',
+          ingredients: ['红薯300g（选红心）', '温水少许'],
+          instructions: ['红薯去皮切块，上锅蒸20分钟至筷子轻松穿透', '趁热用勺子压成泥，太干加少许温水调匀'],
+          tip: '红心红薯更甜更软，不需要加任何调料',
+        },
+        {
+          name: '鸡肉碎米粥',
+          category: '主食',
+          time: '30分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['大米半杯', '鸡胸肉100g', '胡萝卜半根', '姜丝', '盐少许'],
+          instructions: ['大米洗净加水熬粥20分钟，期间搅拌防粘锅', '鸡胸肉剁成细茸，胡萝卜擦细丝', '粥快好时加入鸡茸和胡萝卜丝，搅散煮5分钟，加盐'],
+          tip: '鸡茸提前用少许水调开再下锅，不会结块',
+        },
+        {
+          name: '紫薯山药糊',
+          category: '主食',
+          time: '25分钟',
+          steps: 2,
+          method: '蒸',
+          ingredients: ['紫薯150g', '山药150g', '温水适量'],
+          instructions: ['紫薯和山药分别去皮切块，上锅蒸20分钟', '蒸好后一起放入碗中，加少量温水，用勺子压成糊状'],
+          tip: '紫薯偏干，压泥时多加点温水调到能流动的稠度',
+        },
+        {
+          name: '烂糊面',
+          category: '主食',
+          time: '10分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['细挂面1把', '鸡蛋1个', '上海青2棵', '盐少许', '香油几滴'],
+          instructions: ['水烧开下面条煮3分钟至软烂', '上海青切细末放入，鸡蛋打散淋入搅成蛋花，加盐和香油'],
+          tip: '面条煮到筷子一夹就断的程度，老人吃起来不费力',
+        },
+        {
+          name: '鱼肉青菜粥',
+          category: '主食',
+          time: '25分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['大米半杯', '鲈鱼肉80g', '上海青2棵', '姜丝', '盐少许'],
+          instructions: ['大米洗净加水熬粥20分钟', '鲈鱼肉去皮去刺切小片，上海青切碎末', '粥快好时放入鱼片和姜丝煮3分钟，加青菜末煮1分钟，加盐'],
+          tip: '鱼肉一定要检查干净没有刺再下锅',
+        },
+        {
+          name: '玉米鸡蛋糊',
+          category: '主食',
+          time: '8分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['玉米面粉3勺', '鸡蛋1个', '水适量', '盐少许'],
+          instructions: ['玉米面粉加少量凉水调成糊状（无颗粒）', '锅中水烧开转小火，边倒玉米糊边搅拌，煮3分钟后淋入蛋花，加盐'],
+          tip: '一定要先凉水调开再下锅，否则全是疙瘩',
+        },
+        {
+          name: '碎肉蒸软饭',
+          category: '主食',
+          time: '25分钟',
+          steps: 3,
+          method: '蒸',
+          ingredients: ['大米半杯', '里脊肉80g', '胡萝卜半根', '姜末', '盐少许', '生抽几滴'],
+          instructions: ['大米洗净加水（比平时煮饭多一点，约1:2.5）', '里脊肉剁成细末，加姜末盐生抽拌匀，胡萝卜切细末', '肉末和胡萝卜铺在米上，一起上锅蒸25分钟'],
+          tip: '水比正常米饭多，蒸出来更软烂',
+        },
+        {
+          name: '红枣桂圆小米粥',
+          category: '主食',
+          time: '25分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['小米半杯', '红枣4颗（去皮去核）', '桂圆肉6-8颗'],
+          instructions: ['小米淘净，红枣去皮去核撕碎，桂圆肉洗净', '所有材料加水大火煮开转小火熬20分钟'],
+          tip: '红枣皮不易消化一定要去掉，桂圆自带甜味不用加糖',
+        },
+        {
+          name: '鸡汤烂面',
+          category: '主食',
+          time: '15分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['细挂面1把', '鸡胸肉80g', '娃娃菜3片', '姜丝', '盐少许'],
+          instructions: ['鸡胸肉切薄片，娃娃菜切细丝', '水烧开加姜丝和鸡肉片煮5分钟成简易鸡汤', '下面条和娃娃菜丝煮3分钟至软烂，加盐'],
+          tip: '面条吸饱了鸡汤的味道，不用额外加调料就很鲜',
+        },
+        {
+          name: '凉拌萝卜丝',
+          category: '菜',
+          time: '5分钟',
+          steps: 2,
+          method: '凉拌',
+          ingredients: ['白萝卜200g', '盐少许', '生抽半勺', '醋几滴', '香油2滴'],
+          instructions: ['白萝卜去皮擦细丝，撒少许盐抓匀腌5分钟，挤掉出水', '加生抽、醋、香油拌匀即可'],
+          tip: '盐少放，萝卜自带清甜。比市售咸菜健康得多，配粥刚好',
+        },
+        {
+          name: '蒜泥黄瓜',
+          category: '菜',
+          time: '5分钟',
+          steps: 2,
+          method: '凉拌',
+          ingredients: ['黄瓜1根', '蒜1瓣（捣泥）', '生抽半勺', '醋几滴', '香油2滴'],
+          instructions: ['黄瓜洗净拍碎切段', '蒜捣成泥，加生抽、醋、香油调成汁，淋在黄瓜上拌匀'],
+          tip: '蒜少放一点提味即可，不要太多刺激肠胃。天热吃着特别清爽',
+        },
+        {
+          name: '水煮花生',
+          category: '菜',
+          time: '30分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['生花生米100g', '八角1颗', '盐少许'],
+          instructions: ['花生米洗净，加水和八角', '大火煮开转小火煮25分钟至软面，加少许盐浸泡10分钟入味'],
+          tip: '一次多煮一些，冷藏能吃两三天。比油炸花生健康太多',
+        },
+        {
+          name: '酱黄豆',
+          category: '菜',
+          time: '20分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['干黄豆100g（提前泡一晚）', '生抽1勺', '老抽几滴', '冰糖2小颗'],
+          instructions: ['泡好的黄豆加水煮15分钟至软', '加生抽、老抽、冰糖，小火收汁至将干即可'],
+          tip: '少放酱油和糖，比市售酱菜清淡很多。黄豆蛋白质丰富，补钙',
+        },
+        {
+          name: '凉拌海带丝',
+          category: '菜',
+          time: '8分钟',
+          steps: 2,
+          method: '凉拌',
+          ingredients: ['干海带丝20g', '蒜1瓣（捣泥）', '生抽半勺', '醋几滴', '香油2滴'],
+          instructions: ['海带丝温水泡发，开水焯1分钟捞出过凉', '加蒜泥、生抽、醋、香油拌匀'],
+          tip: '海带丝富含碘和膳食纤维，泡发后一定要焯水去掉腥味',
+        },
+        {
+          name: '蒸咸鸭蛋',
+          category: '菜',
+          time: '10分钟',
+          steps: 1,
+          method: '蒸',
+          ingredients: ['咸鸭蛋1个'],
+          instructions: ['咸鸭蛋冷水上锅，水开后蒸8分钟，取出对半切开'],
+          tip: '咸鸭蛋盐分高，一次最多半个，配粥吃刚好。蛋白咸蛋黄香，老人最爱',
+        },
+        {
+          name: '水煮蛋',
+          category: '菜',
+          time: '10分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['鸡蛋1个'],
+          instructions: ['鸡蛋冷水下锅，水没过鸡蛋', '大火煮开转中小火8分钟（全熟，不要溏心），捞出过凉水好剥壳'],
+          tip: '最朴素的优质蛋白，每天1个就够。一定煮全熟，老人不吃溏心蛋。脂肪集中在蛋黄，奶奶消化不好就吃每餐固定的水煮蛋白',
+        },
+        {
+          name: '水饺',
+          category: '主食',
+          time: '20分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['水饺皮15张', '里脊肉150g', '白菜3片', '姜末', '盐少许', '生抽几滴', '香油几滴'],
+          instructions: [
+            '白菜切碎加少许盐腌5分钟挤干水分，里脊肉剁茸',
+            '肉茸加姜末、盐、生抽、香油拌匀，加入白菜碎搅上劲',
+            '包小饺子（馅少皮薄），水开下锅，煮至浮起再煮3分钟',
+          ],
+          tip: '一次多包些冷冻起来，早上直接下水煮就是一顿。馅少一点好消化，不要包大饺子',
+        },
+      ];
 
-window.addEventListener('DOMContentLoaded', init);
+      var staples = recipes.filter(function (r) {
+        return r.category === '主食';
+      });
+      var dishes = recipes.filter(function (r) {
+        return r.category === '菜';
+      });
 
-</script>
+      var mealState = {
+        早: { stapleIdx: -1, dishIdx: -1, stapleHistory: [], dishHistory: [] },
+        午: { stapleIdx: -1, dishIdx: -1, stapleHistory: [], dishHistory: [] },
+        晚: { stapleIdx: -1, dishIdx: -1, stapleHistory: [], dishHistory: [] },
+      };
 
-</body>
+      function getMeal(recipe) {
+        var n = recipe.name;
+        if (recipe.category === '主食') {
+          if (/粥|糊|羹|粉/.test(n)) return ['早', '晚'];
+          if (/面|馄饨|水饺/.test(n)) return ['早', '午', '晚'];
+          return ['午', '晚'];
+        }
+        // 高盐/高脂/生冷佐粥小菜 + 整蛋（蛋黄偏脂）：只在早/午出现，晚餐清淡不排，减少晚间消化负担
+        if (/咸鸭蛋|花生|酱黄豆|凉拌|海带|蒜泥/.test(n)) return ['早', '午'];
+        if (/蛋羹|蒸蛋|豆腐/.test(n)) return ['早', '午', '晚'];
+        if (/汤/.test(n)) return ['午', '晚'];
+        return ['午', '晚'];
+      }
+
+      function filterForMeal(list, meal) {
+        return list.filter(function (r) {
+          return getMeal(r).indexOf(meal) !== -1;
+        });
+      }
+
+      var INGREDIENT_MAP = {
+        南瓜: '南瓜',
+        山药: '山药',
+        胡萝卜: '胡萝卜',
+        菠菜: '菠菜',
+        冬瓜: '冬瓜',
+        西葫芦: '西葫芦',
+        白萝卜: '萝卜',
+        萝卜丝: '萝卜',
+        丝瓜: '丝瓜',
+        土豆: '土豆',
+        鸡: '鸡肉',
+        猪肝: '猪肝',
+        里脊: '猪肉',
+        肉末: '猪肉',
+        肉片: '猪肉',
+        肉丸: '猪肉',
+        肉饼: '猪肉',
+        排骨: '猪肉',
+        牛肉: '牛肉',
+        虾仁: '虾',
+        鱼肠: '鱼',
+        鸡蛋: '蛋',
+        蛋花: '蛋',
+        蒸蛋: '蛋',
+        蛋白: '蛋',
+        豆腐: '豆腐',
+        小米: '小米',
+        大米: '大米',
+        藕粉: '藕',
+        藕片: '藕',
+        金针菇: '菇',
+        平菇: '菇',
+        香菇: '菇',
+        西兰花: '西兰花',
+        花菜: '花菜',
+        娃娃菜: '白菜',
+        大白菜: '白菜',
+        白菜: '白菜',
+        番茄: '番茄',
+        上海青: '青菜',
+        青菜: '青菜',
+        生菜: '青菜',
+        茼蒿: '青菜',
+        鲈鱼: '鱼',
+        鲫鱼: '鱼',
+        鳊鱼: '鱼',
+        鱼片: '鱼',
+        鱼肉: '鱼',
+        秋葵: '秋葵',
+        红薯: '薯',
+        紫薯: '薯',
+        面线: '面',
+        面条: '面',
+        挂面: '面',
+        馄饨: '面',
+        粉丝: '粉丝',
+        红枣: '红枣',
+        桂圆: '桂圆',
+        莲子: '莲子',
+        银耳: '银耳',
+        百合: '百合',
+        玉米: '玉米',
+      };
+
+      function getKeyIngredients(recipe) {
+        var keys = [];
+        var n = recipe.name;
+        for (var k in INGREDIENT_MAP) {
+          if (n.indexOf(k) !== -1) keys.push(INGREDIENT_MAP[k]);
+        }
+        return keys;
+      }
+
+      function hasConflict(a, b) {
+        var aKeys = getKeyIngredients(a);
+        var bKeys = getKeyIngredients(b);
+        for (var i = 0; i < aKeys.length; i++) {
+          if (bKeys.indexOf(aKeys[i]) !== -1) return true;
+        }
+        return false;
+      }
+
+      function findCompatiblePair(stapleList, dishList, sIdx, dIdx) {
+        var staple = stapleList[sIdx];
+        var dish = dishList[dIdx];
+        if (!hasConflict(staple, dish)) return { staple: staple, dish: dish, sIdx: sIdx, dIdx: dIdx };
+        for (var i = 0; i < dishList.length; i++) {
+          if (i !== dIdx && !hasConflict(staple, dishList[i])) return { staple: staple, dish: dishList[i], sIdx: sIdx, dIdx: i };
+        }
+        for (var j = 0; j < stapleList.length; j++) {
+          if (j !== sIdx && !hasConflict(stapleList[j], dish)) return { staple: stapleList[j], dish: dish, sIdx: j, dIdx: dIdx };
+        }
+        return { staple: staple, dish: dish, sIdx: sIdx, dIdx: dIdx };
+      }
+
+      function getDifficulty(recipe) {
+        if (recipe.steps <= 1 || recipe.method === '冲调') return '★';
+        if (recipe.steps === 2 && (recipe.method === '蒸' || recipe.method === '煮')) return '★★';
+        return '★★★';
+      }
+
+      function getNutritionTags(recipe) {
+        var tags = [];
+        var n = recipe.name;
+        var ing = recipe.ingredients.join('');
+        if (/鸡|鱼|虾|肉|蛋|豆腐|牛肉|猪肝/.test(n)) tags.push({ cls: 'protein', label: '高蛋白' });
+        if (/粥|糊|羹|泥|蒸蛋|豆腐|汤/.test(n) && recipe.method !== '清炒' && recipe.method !== '炖') tags.push({ cls: 'digest', label: '易消化' });
+        if (/猪肝|菠菜|红枣/.test(n)) tags.push({ cls: 'iron', label: '补铁' });
+        if (/西兰花|花菜|菠菜|白菜|青菜|秋葵|胡萝卜|芹菜|茼蒿|金针菇|平菇|香菇|南瓜/.test(n)) tags.push({ cls: 'fiber', label: '高纤维' });
+        if (/豆腐|虾|排骨|鲫鱼|银耳/.test(n)) tags.push({ cls: 'calcium', label: '补钙' });
+        if (/牛肉|猪里脊|鸡胸|鲈鱼|蛋白|蒸/.test(n) && !/排骨/.test(n) && !/五花/.test(ing)) tags.push({ cls: 'lowfat', label: '低脂' });
+        return tags.slice(0, 3);
+      }
+
+      // 奶奶（胰腺术后）慎食：高脂、高盐或生冷刺激，标注后界面提示减量/不吃，爷爷可正常
+      function getCaution(recipe) {
+        var n = recipe.name;
+        if (/排骨|猪肝|咸鸭蛋|花生|酱黄豆/.test(n)) return '奶奶减量';
+        if (/凉拌|海带|蒜泥|黄瓜/.test(n)) return '奶奶忌生冷';
+        return '';
+      }
+
+      function trySwap(list, history, todayIdx, otherRecipe) {
+        if (list.length <= 1) return null; // 本餐只有一道可选，没法换
+        // 本餐可选菜都轮看过一遍后，清空历史从头开始，按钮永不锁死
+        if (history.length >= list.length - 1) history.length = 0;
+        var idx,
+          attempts = 0;
+        do {
+          idx = Math.floor(Math.random() * list.length);
+          attempts++;
+        } while (attempts < 200 && (idx === todayIdx || history.indexOf(idx) !== -1 || (otherRecipe && hasConflict(list[idx], otherRecipe))));
+        return { idx: idx, recipe: list[idx] };
+      }
+
+      function getTodayIndex(list) {
+        var now = new Date();
+        var start = new Date(now.getFullYear(), 0, 0);
+        var dayOfYear = Math.floor((now - start) / 86400000);
+        return dayOfYear % list.length;
+      }
+
+      function renderCompact(meal, staple, dish) {
+        var el = document.getElementById('compact-' + meal);
+        if (!el) return;
+        var sStars = getDifficulty(staple);
+        var sTagStr = getNutritionTags(staple)
+          .map(function (t) {
+            return t.label;
+          })
+          .join(' · ');
+        var dStars = getDifficulty(dish);
+        var dTagStr = getNutritionTags(dish)
+          .map(function (t) {
+            return t.label;
+          })
+          .join(' · ');
+        el.innerHTML =
+          '<div class="meal-item">' +
+          '<span class="item-cat staple">主食</span>' +
+          '<span class="item-name">' +
+          staple.name +
+          '</span>' +
+          '<span class="item-meta">' +
+          '<span class="meta-time">' +
+          staple.time +
+          '</span><span class="sep">·</span>' +
+          '<span class="meta-steps">' +
+          staple.steps +
+          '步</span><span class="sep">·</span>' +
+          '<span class="meta-method">' +
+          staple.method +
+          '</span><span class="sep">·</span>' +
+          '<span class="meta-stars">' +
+          sStars +
+          '</span>' +
+          (sTagStr ? '<span class="sep">·</span>' + sTagStr : '') +
+          '</span>' +
+          '</div>' +
+          '<div class="meal-item">' +
+          '<span class="item-cat dish">菜品</span>' +
+          '<span class="item-name">' +
+          dish.name +
+          (getCaution(dish) ? ' <span class="item-caution">⚠' + getCaution(dish) + '</span>' : '') +
+          '</span>' +
+          '<span class="item-meta">' +
+          '<span class="meta-time">' +
+          dish.time +
+          '</span><span class="sep">·</span>' +
+          '<span class="meta-steps">' +
+          dish.steps +
+          '步</span><span class="sep">·</span>' +
+          '<span class="meta-method">' +
+          dish.method +
+          '</span><span class="sep">·</span>' +
+          '<span class="meta-stars">' +
+          dStars +
+          '</span>' +
+          (dTagStr ? '<span class="sep">·</span>' + dTagStr : '') +
+          '</span>' +
+          '</div>' +
+          '<div class="meal-item">' +
+          '<span class="item-cat fixed">固定</span>' +
+          '<span class="item-name">水煮蛋白 1-2 个</span>' +
+          '<span class="item-meta">' +
+          '<span class="meta-time">10分钟</span><span class="sep">·</span>' +
+          '<span class="meta-steps"></span><span class="sep">·</span>' +
+          '<span class="meta-method">煮</span><span class="sep">·</span>' +
+          '<span class="meta-stars">★</span>' +
+          '<span class="sep">·</span><span>高蛋白 · 低脂</span>' +
+          '</span>' +
+          '</div>';
+      }
+
+      function renderDetail(meal, staple, dish) {
+        var el = document.getElementById('detail-' + meal);
+        if (!el) return;
+        var html = '';
+        [
+          ['staple-card', staple, '🥄'],
+          ['dish-card', dish, '🍽️'],
+        ].forEach(function (item) {
+          var cls = item[0],
+            r = item[1],
+            icon = item[2];
+          html += '<div class="detail-card ' + cls + '">';
+          html += '<div class="detail-title">' + icon + ' ' + r.name + '</div>';
+          html += '<div class="detail-ingredients">';
+          for (var i = 0; i < r.ingredients.length; i++) {
+            html += '<span class="ingredient-tag">' + r.ingredients[i] + '</span> ';
+          }
+          html += '</div><ol class="detail-steps">';
+          for (var j = 0; j < r.instructions.length; j++) {
+            html += '<li><span class="detail-step-num">' + (j + 1) + '</span>' + r.instructions[j] + '</li>';
+          }
+          html += '</ol>';
+          if (r.tip) html += '<div class="detail-tip">💡 ' + r.tip + '</div>';
+          html += '</div>';
+        });
+        el.innerHTML = html;
+      }
+
+      function toggleMeal(meal) {
+        var detail = document.getElementById('detail-' + meal);
+        var toggle = document.getElementById('toggle-' + meal);
+        if (!detail || !toggle) return;
+        if (detail.classList.contains('hidden')) {
+          var state = mealState[meal];
+          if (!detail.innerHTML.trim()) renderDetail(meal, state.staple, state.dish);
+          detail.classList.remove('hidden');
+          toggle.textContent = '▴ 收起做法';
+        } else {
+          detail.classList.add('hidden');
+          toggle.textContent = '▾ 查看做法';
+        }
+      }
+
+      function swapMeal(meal, type) {
+        var state = mealState[meal];
+        var avail = filterForMeal(type === 'staple' ? staples : dishes, meal);
+        var history = type === 'staple' ? state.stapleHistory : state.dishHistory;
+        var todayIdx = type === 'staple' ? state.stapleIdx : state.dishIdx;
+        var otherRecipe = type === 'staple' ? state.dish : state.staple;
+        var result = trySwap(avail, history, todayIdx, otherRecipe);
+
+        if (!result) {
+          var row = document.querySelector('.meal-row[data-meal="' + meal + '"]');
+          if (row) {
+            var btns = row.querySelectorAll('.btn-meal-swap');
+            for (var b = 0; b < btns.length; b++) {
+              if (btns[b].textContent.indexOf(type === 'staple' ? '主食' : '菜品') !== -1) {
+                btns[b].disabled = true;
+                btns[b].textContent = '仅此一道';
+              }
+            }
+          }
+          return;
+        }
+
+        history.push(result.idx);
+        if (type === 'staple') {
+          state.stapleIdx = result.idx;
+          state.staple = result.recipe;
+        } else {
+          state.dishIdx = result.idx;
+          state.dish = result.recipe;
+        }
+        renderCompact(meal, state.staple, state.dish);
+        var detail = document.getElementById('detail-' + meal);
+        if (detail && !detail.classList.contains('hidden')) renderDetail(meal, state.staple, state.dish);
+      }
+
+      function hasReminder() {
+        var el = document.getElementById('reminder-text');
+        return el && el.textContent.trim().length > 0;
+      }
+
+      function getCurrentMeal() {
+        var h = new Date().getHours();
+        if (h >= 5 && h < 10) return '早';
+        if (h >= 10 && h < 14) return '午';
+        return '晚';
+      }
+
+      function init() {
+        if (hasReminder()) {
+          document.getElementById('reminder-section').classList.remove('hidden');
+          document.title = '今日叮嘱';
+        } else {
+          document.getElementById('reminder-section').classList.add('hidden');
+        }
+
+        var meals = ['早', '午', '晚'];
+        var currentMeal = getCurrentMeal();
+        var mealClasses = { 早: 'meal-breakfast', 午: 'meal-lunch', 晚: 'meal-dinner' };
+
+        for (var m = 0; m < meals.length; m++) {
+          var meal = meals[m];
+          var availStaples = filterForMeal(staples, meal);
+          var availDishes = filterForMeal(dishes, meal);
+          var sIdx = getTodayIndex(availStaples);
+          var dIdx = getTodayIndex(availDishes);
+          var pair = findCompatiblePair(availStaples, availDishes, sIdx, dIdx);
+          var state = mealState[meal];
+          state.staple = pair.staple;
+          state.dish = pair.dish;
+          state.stapleIdx = pair.sIdx;
+          state.dishIdx = pair.dIdx;
+          state.stapleHistory = [pair.sIdx];
+          state.dishHistory = [pair.dIdx];
+          renderCompact(meal, pair.staple, pair.dish);
+
+          var row = document.querySelector('.meal-row[data-meal="' + meal + '"]');
+          if (row) {
+            row.classList.add(mealClasses[meal]);
+            if (meal === currentMeal) row.classList.add('current');
+          }
+        }
+      }
+
+      window.addEventListener('DOMContentLoaded', init);
+    </script>
+  </body>
 </html>

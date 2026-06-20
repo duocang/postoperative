@@ -83,7 +83,7 @@
         justify-content: center;
         padding: 10px 20px;
         border-radius: var(--radius-md);
-        font-size: clamp(42px, 7vw, 100px);
+        font-size: 34px;
         font-weight: 900;
         text-align: center;
         border: 2.5px solid;
@@ -2089,6 +2089,23 @@
         return '晚';
       }
 
+      function sizeReminders() {
+        var items = document.querySelectorAll('.reminder-item');
+        for (var i = 0; i < items.length; i++) {
+          var item = items[i];
+          var text = item.textContent.trim();
+          if (!text) continue;
+          var charW = 0;
+          for (var j = 0; j < text.length; j++) {
+            charW += text.charCodeAt(j) > 127 ? 1 : 0.5;
+          }
+          var w = item.clientWidth;
+          if (!w) continue;
+          var size = Math.floor(w / charW * 0.88);
+          item.style.fontSize = Math.max(28, Math.min(size, 110)) + 'px';
+        }
+      }
+
       function init() {
         if (hasReminder()) {
           document.getElementById('reminder-section').classList.remove('hidden');
@@ -2123,9 +2140,11 @@
             if (meal === currentMeal) row.classList.add('current');
           }
         }
+        requestAnimationFrame(sizeReminders);
       }
 
       window.addEventListener('DOMContentLoaded', init);
+      window.addEventListener('resize', sizeReminders);
     </script>
   </body>
 </html>

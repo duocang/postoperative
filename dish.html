@@ -74,17 +74,22 @@
         display: flex;
         gap: 12px;
         justify-content: center;
+        height: 30vh;
       }
       .reminder-item {
-        padding: 10px 28px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 20px;
         border-radius: var(--radius-md);
-        font-size: 34px;
-        font-weight: 700;
+        font-size: clamp(28px, 4.5vw, 90px);
+        font-weight: 900;
         text-align: center;
         border: 2.5px solid;
-        line-height: 1.3;
-        flex: 1;
+        line-height: 1.15;
         min-width: 0;
+        overflow: hidden;
         animation: breathe 3.5s ease-in-out infinite alternate;
       }
       .reminder-item:nth-child(1) {

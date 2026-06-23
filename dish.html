@@ -886,6 +886,191 @@
         line-height: 1.5;
       }
 
+      /* ===== Elder-first home ===== */
+      .elder-home {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .elder-status {
+        border: 2px solid #7bb08d;
+        background: #f1faf4;
+        border-radius: var(--radius-md);
+        padding: 14px 18px;
+      }
+
+      .elder-status-label {
+        color: #2d6a4f;
+        font-size: 20px;
+        font-weight: 800;
+        margin-bottom: 4px;
+      }
+
+      .elder-status-text {
+        color: var(--color-text);
+        font-size: 34px;
+        font-weight: 900;
+        line-height: 1.25;
+      }
+
+      .current-meal-hero {
+        background: #fffdf8;
+        border: 3px solid #d4a017;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-md);
+        padding: 18px 20px;
+      }
+
+      .hero-kicker {
+        color: #8a5a00;
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 6px;
+      }
+
+      .hero-title {
+        color: var(--color-text);
+        font-size: 44px;
+        font-weight: 900;
+        line-height: 1.15;
+        margin-bottom: 14px;
+      }
+
+      .hero-food-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .hero-food {
+        background: #ffffff;
+        border: 2px solid #ead6aa;
+        border-radius: var(--radius-md);
+        padding: 12px;
+      }
+
+      .hero-food-label {
+        color: var(--color-text-secondary);
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+
+      .hero-food-name {
+        color: var(--color-text);
+        font-size: 28px;
+        font-weight: 900;
+        line-height: 1.2;
+      }
+
+      .hero-safe-note {
+        background: #edf7f2;
+        border-left: 5px solid #5b8a72;
+        border-radius: var(--radius-sm);
+        color: #234d3a;
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1.35;
+        padding: 10px 12px;
+        margin-bottom: 14px;
+      }
+
+      .hero-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .hero-swap-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .elder-btn {
+        border: 2px solid #c9b489;
+        border-radius: var(--radius-md);
+        background: #ffffff;
+        color: var(--color-text);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 24px;
+        font-weight: 900;
+        min-height: 58px;
+        padding: 10px 18px;
+      }
+
+      .elder-btn.primary {
+        background: #5b8a72;
+        border-color: #4f7c65;
+        color: #ffffff;
+      }
+
+      .elder-detail {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .elder-detail .detail-card {
+        padding: 12px;
+      }
+
+      .elder-detail .detail-title {
+        font-size: 26px;
+      }
+
+      .elder-detail .detail-ingredients,
+      .elder-detail .detail-steps li,
+      .elder-detail .detail-tip {
+        font-size: 22px;
+      }
+
+      .elder-detail .detail-step-num {
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+      }
+
+      .next-meal-preview {
+        border: 2px solid #c5cce6;
+        background: #f6f7fc;
+        border-radius: var(--radius-md);
+        color: var(--color-text);
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1.35;
+        padding: 12px 16px;
+      }
+
+      .caregiver-switch {
+        align-self: center;
+        color: var(--color-text-secondary);
+        font-size: 18px;
+        font-weight: 800;
+        min-height: 44px;
+        padding: 8px 16px;
+      }
+
+      body[data-mode="elder"] .caregiver-panel {
+        display: none;
+      }
+
+      body[data-mode="caregiver"] .caregiver-panel {
+        display: flex;
+      }
+
+      body[data-mode="caregiver"] .meals-section {
+        gap: 18px;
+      }
+
+      body[data-mode="caregiver"] .elder-home {
+        margin-bottom: 4px;
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
@@ -894,9 +1079,41 @@
           animation-duration: 0.01ms !important;
         }
       }
+
+      body[data-mode="elder"] .reminder-item,
+      body[data-mode="elder"] .meal-row {
+        animation: none;
+      }
+
+      body[data-mode="elder"] .reminder-row {
+        height: 22vh;
+      }
+
+      @media (max-width: 760px) {
+        body {
+          padding: 8px;
+        }
+
+        .hero-title {
+          font-size: 34px;
+        }
+
+        .hero-food-list,
+        .elder-detail {
+          grid-template-columns: 1fr;
+        }
+
+        .elder-status-text {
+          font-size: 28px;
+        }
+
+        .elder-btn {
+          width: 100%;
+        }
+      }
     </style>
   </head>
-  <body>
+  <body data-mode="elder">
     <div class="container">
       <!-- Reminder -->
       <div id="reminder-section" class="hidden">
@@ -911,8 +1128,31 @@
       <!-- Diet Note -->
       <div class="diet-note">🥄 胰腺友好：低脂少油 · 少食多餐 · 晚餐清淡 · 趁热吃</div>
 
+      <!-- Elder Home -->
+      <section class="elder-home" aria-label="老人首页">
+        <div class="elder-status">
+          <div class="elder-status-label">现在看这里</div>
+          <div class="elder-status-text" id="current-action">今天按时吃饭，少量多餐。</div>
+        </div>
+
+        <div class="current-meal-hero" id="current-meal-hero">
+          <div class="hero-kicker" id="hero-kicker">当前餐</div>
+          <div class="hero-title" id="hero-title">正在准备今日菜单</div>
+          <div class="hero-food-list" id="hero-food-list"></div>
+          <div class="hero-safe-note">默认已避开：高盐、生冷、胀气、高脂重口。吃不下就少吃一点，别硬撑。</div>
+          <div class="hero-actions">
+            <button class="elder-btn primary" type="button" onclick="toggleCurrentDetail()">看做法</button>
+            <div class="hero-swap-actions" id="current-swap-actions"></div>
+          </div>
+          <div class="elder-detail hidden" id="current-meal-detail"></div>
+        </div>
+
+        <div class="next-meal-preview" id="next-meal-preview">下一餐稍后显示。</div>
+        <button class="elder-btn caregiver-switch" type="button" onclick="toggleCaregiverMode()">家属查看全天菜单</button>
+      </section>
+
       <!-- Meals -->
-      <div class="meals-section">
+      <div class="meals-section caregiver-panel">
         <div class="meal-row" data-meal="早">
           <div class="meal-header">
             <span class="meal-icon">🥣</span>
@@ -1021,7 +1261,7 @@
           method: '煮',
           ingredients: ['大米半杯', '猪里脊80g', '鲜香菇2朵', '姜丝', '盐少许', '葱花'],
           instructions: ['大米洗净加水，大火煮开后转小火熬20分钟', '里脊肉剁末，香菇切细丁', '粥快好时加入肉末和香菇丁，搅散煮5分钟，加盐撒葱花'],
-          tip: '香菇和肉末菜场现成好买，鲜得很，比鸡茸省事',
+          tip: '香菇和肉末菜场现成好买，鲜得很，比处理鸡胸肉更省事',
         },
         {
           name: '冬瓜蒸肉末',
@@ -1138,13 +1378,13 @@
           tip: '南瓜自带甜味，无需加糖',
         },
         {
-          name: '鸡茸豆腐羹',
+          name: '鸡肉末豆腐羹',
           category: '菜',
           time: '15分钟',
           steps: 3,
           method: '煮',
           ingredients: ['鸡胸肉80g', '嫩豆腐半块', '鸡蛋清1个', '姜末', '盐少许', '水淀粉少许'],
-          instructions: ['鸡胸肉剁茸，豆腐捏碎', '水烧开加姜末，放入鸡茸搅散', '加入豆腐碎，淋蛋清搅成蛋花，少许水淀粉勾薄芡，加盐'],
+          instructions: ['鸡胸肉剁成细末，豆腐捏碎', '水烧开加姜末，放入鸡肉末搅散', '加入豆腐碎，淋蛋清搅成蛋花，少许水淀粉勾薄芡，加盐'],
           tip: '勾薄芡让口感更滑嫩',
         },
         {
@@ -1328,13 +1568,13 @@
           tip: '秋葵切片像星星，好看又营养',
         },
         {
-          name: '西兰花炒鸡茸',
+          name: '西兰花炒鸡肉末',
           category: '菜',
           time: '12分钟',
           steps: 3,
           method: '清炒',
           ingredients: ['西兰花半颗', '鸡胸肉80g', '姜末', '盐少许', '油少许'],
-          instructions: ['西兰花掰小朵焯水2分钟至软', '鸡胸肉剁茸，少许油炒散', '加入西兰花翻炒均匀，加盐'],
+          instructions: ['西兰花掰小朵焯水2分钟至软', '鸡胸肉剁成细末，少许油炒散', '加入西兰花翻炒均匀，加盐'],
           tip: '西兰花焯水后要煮软，方便老人咀嚼',
         },
         {
@@ -1444,7 +1684,7 @@
           steps: 3,
           method: '蒸',
           ingredients: ['土豆200g', '鸡胸肉100g', '盐少许', '姜末'],
-          instructions: ['土豆去皮蒸熟压成泥，鸡胸肉剁茸', '土豆泥和鸡肉茸加姜末盐拌匀', '做成小饼状，上锅蒸10分钟'],
+          instructions: ['土豆去皮蒸熟压成泥，鸡胸肉剁成细末', '土豆泥和鸡肉末加姜末盐拌匀', '做成小饼状，上锅蒸10分钟'],
           tip: '做小一点，方便老人一口一个',
         },
         {
@@ -1548,14 +1788,14 @@
           tip: '面线细软易消化，煮的时间不要太长',
         },
         {
-          name: '鸡茸西葫芦',
+          name: '鸡肉末西葫芦',
           category: '菜',
           time: '12分钟',
           steps: 3,
           method: '清炒',
           ingredients: ['西葫芦1根', '鸡胸肉80g', '姜末', '盐少许', '油少许'],
-          instructions: ['西葫芦切薄片，鸡胸肉剁茸', '少许油炒鸡茸至变色', '加入西葫芦翻炒至变软透明，加盐'],
-          tip: '鸡茸比鸡片更嫩，适合老人',
+          instructions: ['西葫芦切薄片，鸡胸肉剁成细末', '少许油炒鸡肉末至变色', '加入西葫芦翻炒至变软透明，加盐'],
+          tip: '鸡胸肉切末比切片更好嚼，家里做起来也顺手',
         },
         {
           name: '山药肉末盅',
@@ -1674,8 +1914,8 @@
           steps: 3,
           method: '煮',
           ingredients: ['大米半杯', '鸡胸肉100g', '上海青2棵', '姜丝', '盐少许'],
-          instructions: ['大米洗净加水熬粥20分钟，期间搅拌防粘锅', '鸡胸肉剁成细茸，上海青切碎末', '粥快好时加入鸡茸搅散煮3分钟，再加青菜末煮2分钟，加盐'],
-          tip: '鸡茸提前用少许水调开再下锅，不会结块',
+          instructions: ['大米洗净加水熬粥20分钟，期间搅拌防粘锅', '鸡胸肉剁成细末，上海青切碎末', '粥快好时加入鸡肉末搅散煮3分钟，再加青菜末煮2分钟，加盐'],
+          tip: '鸡肉末提前用少许水调开再下锅，不会结块',
         },
         {
           name: '紫薯山药糊',
@@ -2247,6 +2487,24 @@
         return '';
       }
 
+      function isGrandmaRisky(recipe) {
+        var n = recipe.name;
+        var ing = recipe.ingredients.join('');
+        if (/酸黄瓜|大头菜|榨菜|咸鸭蛋|酱黄豆/.test(n)) return true;
+        if (/凉拌|蒜泥|海带|黄瓜/.test(n) || recipe.method === '凉拌') return true;
+        if (/红薯|紫薯|玉米|黄豆|豆芽|芋头|韭菜|洋葱|蒜苗/.test(n + ing)) return true;
+        if (/排骨|五花|猪肝|肥肉|腊肉|香肠/.test(n + ing)) return true;
+        if (/油适量|老抽|冰糖|糖少许|生抽1勺|生抽2勺/.test(ing)) return true;
+        if (recipe.method === '炖' && !/鸡胸|里脊|冬瓜|白萝卜/.test(n + ing)) return true;
+        return false;
+      }
+
+      function getSafeMealOptions(list, meal) {
+        return filterForMeal(list, meal).filter(function (r) {
+          return !isGrandmaRisky(r);
+        });
+      }
+
       function trySwap(list, history, todayIdx, otherRecipe) {
         if (list.length <= 1) return null; // 本餐只有一道可选，没法换
         // 本餐可选菜都轮看过一遍后，清空历史从头开始，按钮永不锁死
@@ -2327,6 +2585,36 @@
         '</span>' +
         '</div>';
 
+      function mealCardsHtml(meal, staple, dish, cold, soup) {
+        var html = '';
+        var cards = [
+          ['staple-card', staple, '🥄'],
+          ['dish-card', dish, '🍽️'],
+        ];
+        if (meal === '午' && soup) cards.push(['dish-card', soup, '🍲']);
+        if (meal === '午' && cold) cards.push(['dish-card', cold, '🥗']);
+        cards.forEach(function (item) {
+          var cls = item[0],
+            r = item[1],
+            icon = item[2];
+          if (!r) return;
+          html += '<div class="detail-card ' + cls + '">';
+          html += '<div class="detail-title">' + icon + ' ' + r.name + '</div>';
+          html += '<div class="detail-ingredients">';
+          for (var i = 0; i < r.ingredients.length; i++) {
+            html += '<span class="ingredient-tag">' + r.ingredients[i] + '</span> ';
+          }
+          html += '</div><ol class="detail-steps">';
+          for (var j = 0; j < r.instructions.length; j++) {
+            html += '<li><span class="detail-step-num">' + (j + 1) + '</span><span>' + r.instructions[j] + '</span></li>';
+          }
+          html += '</ol>';
+          if (r.tip) html += '<div class="detail-tip">💡 ' + r.tip + '</div>';
+          html += '</div>';
+        });
+        return html;
+      }
+
       function renderCompact(meal, staple, dish, cold, soup) {
         var el = document.getElementById('compact-' + meal);
         if (!el) return;
@@ -2346,32 +2634,126 @@
       function renderDetail(meal, staple, dish, cold, soup) {
         var el = document.getElementById('detail-' + meal);
         if (!el) return;
-        var html = '';
-        var cards = [
-          ['staple-card', staple, '🥄'],
-          ['dish-card', dish, '🍽️'],
+        el.innerHTML = mealCardsHtml(meal, staple, dish, cold, soup);
+      }
+
+      function getMealLabel(meal) {
+        return meal === '早' ? '早餐' : meal === '午' ? '午餐' : '晚餐';
+      }
+
+      function getNextMeal(meal) {
+        return meal === '早' ? '午' : meal === '午' ? '晚' : '早';
+      }
+
+      function heroFood(label, recipe) {
+        if (!recipe) return '';
+        return (
+          '<div class="hero-food">' +
+          '<div class="hero-food-label">' +
+          label +
+          '</div>' +
+          '<div class="hero-food-name">' +
+          recipe.name +
+          '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderCurrentHero() {
+        var currentMeal = getCurrentMeal();
+        var state = mealState[currentMeal];
+        if (!state || !state.staple || !state.dish) return;
+
+        var kicker = document.getElementById('hero-kicker');
+        var title = document.getElementById('hero-title');
+        var list = document.getElementById('hero-food-list');
+        var next = document.getElementById('next-meal-preview');
+        var action = document.getElementById('current-action');
+        var nextMeal = getNextMeal(currentMeal);
+        var nextState = mealState[nextMeal];
+
+        if (kicker) kicker.textContent = '现在：' + getMealLabel(currentMeal);
+        if (title) title.textContent = getMealLabel(currentMeal) + '吃这些';
+        if (list) {
+          var html = heroFood('主食', state.staple) + heroFood(currentMeal === '午' ? '热菜' : '菜品', state.dish);
+          if (currentMeal === '午' && state.soup) html += heroFood('热汤', state.soup);
+          html += heroFood('固定', { name: '水煮蛋白 1-2 个' });
+          list.innerHTML = html;
+        }
+        if (next && nextState && nextState.staple && nextState.dish) {
+          next.textContent = '下一餐：' + getMealLabel(nextMeal) + ' · ' + nextState.staple.name + '，配 ' + nextState.dish.name;
+        }
+        if (action) action.textContent = getCurrentActionText();
+        renderCurrentSwapActions(currentMeal);
+      }
+
+      function getCurrentSwapActions(meal) {
+        var actions = [
+          { type: 'staple', label: '换主食' },
+          { type: 'dish', label: meal === '午' ? '换热菜' : '换菜品' },
         ];
-        if (meal === '午' && soup) cards.push(['dish-card', soup, '🍲']);
-        if (meal === '午' && cold) cards.push(['dish-card', cold, '🥗']);
-        cards.forEach(function (item) {
-          var cls = item[0],
-            r = item[1],
-            icon = item[2];
-          html += '<div class="detail-card ' + cls + '">';
-          html += '<div class="detail-title">' + icon + ' ' + r.name + '</div>';
-          html += '<div class="detail-ingredients">';
-          for (var i = 0; i < r.ingredients.length; i++) {
-            html += '<span class="ingredient-tag">' + r.ingredients[i] + '</span> ';
-          }
-          html += '</div><ol class="detail-steps">';
-          for (var j = 0; j < r.instructions.length; j++) {
-            html += '<li><span class="detail-step-num">' + (j + 1) + '</span>' + r.instructions[j] + '</li>';
-          }
-          html += '</ol>';
-          if (r.tip) html += '<div class="detail-tip">💡 ' + r.tip + '</div>';
-          html += '</div>';
-        });
+        if (meal === '午' && getSafeMealOptions(soups, meal).length > 1) {
+          actions.push({ type: 'soup', label: '换热汤' });
+        }
+        if (meal === '午' && getSafeMealOptions(coldDishes, meal).length > 1) {
+          actions.push({ type: 'cold', label: '换凉菜' });
+        }
+        return actions;
+      }
+
+      function renderCurrentSwapActions(meal) {
+        var el = document.getElementById('current-swap-actions');
+        if (!el) return;
+        var actions = getCurrentSwapActions(meal);
+        var html = '';
+        for (var i = 0; i < actions.length; i++) {
+          html +=
+            '<button class="elder-btn" type="button" onclick="swapCurrentSimple(this.dataset.swapType)" data-swap-type="' +
+            actions[i].type +
+            '">' +
+            actions[i].label +
+            '</button>';
+        }
         el.innerHTML = html;
+      }
+
+      function getCurrentActionText() {
+        var h = new Date().getHours();
+        if (h >= 9 && h < 11) return '上午加餐：佳膳悠选 1 杯，别冰着喝。';
+        if (h >= 14 && h < 16) return '下午加餐：佳膳悠选 1 杯，晚饭前留出 2 小时。';
+        if (h >= 18) return '晚餐要早一点、少一点，饭后慢走 10 分钟。';
+        return '今天少量多餐，所有食物都趁热吃。';
+      }
+
+      function toggleCurrentDetail() {
+        var currentMeal = getCurrentMeal();
+        var state = mealState[currentMeal];
+        var detail = document.getElementById('current-meal-detail');
+        if (!detail || !state) return;
+        if (detail.classList.contains('hidden')) {
+          detail.innerHTML = mealCardsHtml(currentMeal, state.staple, state.dish, state.cold, state.soup);
+          detail.classList.remove('hidden');
+        } else {
+          detail.classList.add('hidden');
+        }
+      }
+
+      function swapCurrentSimple(type) {
+        var currentMeal = getCurrentMeal();
+        swapMeal(currentMeal, type || 'dish');
+        renderCurrentHero();
+        var detail = document.getElementById('current-meal-detail');
+        if (detail && !detail.classList.contains('hidden')) {
+          var state = mealState[currentMeal];
+          detail.innerHTML = mealCardsHtml(currentMeal, state.staple, state.dish, state.cold, state.soup);
+        }
+      }
+
+      function toggleCaregiverMode() {
+        var mode = document.body.getAttribute('data-mode') === 'caregiver' ? 'elder' : 'caregiver';
+        document.body.setAttribute('data-mode', mode);
+        var btn = document.querySelector('.caregiver-switch');
+        if (btn) btn.textContent = mode === 'caregiver' ? '收起全天菜单' : '家属查看全天菜单';
       }
 
       function toggleMeal(meal) {
@@ -2413,7 +2795,7 @@
           todayIdx = state.dishIdx;
           otherRecipe = state.staple; // 热菜与主食避开食材冲突 + 水配水
         }
-        var avail = filterForMeal(pool, meal);
+        var avail = getSafeMealOptions(pool, meal);
         var result = trySwap(avail, history, todayIdx, otherRecipe);
 
         if (!result) {
@@ -2446,6 +2828,7 @@
           state.dish = result.recipe;
         }
         renderCompact(meal, state.staple, state.dish, state.cold, state.soup);
+        renderCurrentHero();
         var detail = document.getElementById('detail-' + meal);
         if (detail && !detail.classList.contains('hidden')) renderDetail(meal, state.staple, state.dish, state.cold, state.soup);
       }
@@ -2523,8 +2906,8 @@
 
         for (var m = 0; m < meals.length; m++) {
           var meal = meals[m];
-          var availStaples = filterForMeal(staples, meal);
-          var availDishes = filterForMeal(dishes, meal);
+          var availStaples = getSafeMealOptions(staples, meal);
+          var availDishes = getSafeMealOptions(dishes, meal);
           var sIdx;
           // 淮安人午饭吃米饭：午餐默认优先米饭/软饭，不要粥糊糕点
           if (meal === '午') {
@@ -2547,7 +2930,7 @@
           state.dishHistory = [pair.dIdx];
           // 午餐额外排一道热汤、一道凉菜
           if (meal === '午') {
-            var availSoup = filterForMeal(soups, meal);
+            var availSoup = getSafeMealOptions(soups, meal);
             if (availSoup.length) {
               var soupIdx = getTodayIndex(availSoup);
               // 汤别和主食撞食材（午餐主食是米饭，一般不冲突，保险起见检查一下）
@@ -2563,7 +2946,7 @@
               state.soupIdx = soupIdx;
               state.soupHistory = [soupIdx];
             }
-            var availCold = filterForMeal(coldDishes, meal);
+            var availCold = getSafeMealOptions(coldDishes, meal);
             if (availCold.length) {
               var cIdx = getTodayIndex(availCold);
               state.cold = availCold[cIdx];
@@ -2579,6 +2962,7 @@
             if (meal === currentMeal) row.classList.add('current');
           }
         }
+        renderCurrentHero();
         requestAnimationFrame(sizeReminders);
       }
 

@@ -41,28 +41,31 @@
 
       html,
       body {
-        min-height: 100vh;
+        height: 100vh;
       }
 
       body {
         font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
         background: var(--color-bg);
         color: var(--color-text);
-        padding: 6px 8px;
+        padding: 4px 8px;
         font-size: 18px;
         line-height: 1.5;
         -webkit-font-smoothing: antialiased;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
       }
 
       .container {
         width: 100%;
         max-width: none;
         margin: 0 auto;
+        flex: 1;
+        min-height: 0;
         display: flex;
         flex-direction: column;
-        gap: 16px;
+        gap: 6px;
       }
 
       .hidden {
@@ -888,81 +891,89 @@
 
       /* ===== Elder-first home ===== */
       .elder-home {
+        flex: 1;
+        min-height: 0;
         display: flex;
         flex-direction: column;
-        gap: 14px;
+        gap: 6px;
       }
 
       .elder-status {
         border: 2px solid #7bb08d;
         background: #f1faf4;
         border-radius: var(--radius-md);
-        padding: 14px 18px;
+        padding: 6px 16px;
       }
 
       .elder-status-label {
         color: #2d6a4f;
-        font-size: 20px;
+        font-size: 15px;
         font-weight: 800;
-        margin-bottom: 4px;
+        margin-bottom: 0;
       }
 
       .elder-status-text {
         color: var(--color-text);
-        font-size: 34px;
+        font-size: 24px;
         font-weight: 900;
-        line-height: 1.25;
+        line-height: 1.15;
       }
 
       .current-meal-hero {
+        flex: 0 0 auto;
+        display: flex;
+        flex-direction: column;
         background: #fffdf8;
         border: 3px solid #d4a017;
         border-radius: var(--radius-lg);
         box-shadow: var(--shadow-md);
-        padding: 18px 20px;
+        padding: 10px 18px;
       }
 
       .hero-kicker {
         color: #8a5a00;
-        font-size: 22px;
+        font-size: 16px;
         font-weight: 800;
-        margin-bottom: 6px;
+        margin-bottom: 2px;
       }
 
       .hero-title {
         color: var(--color-text);
-        font-size: 44px;
+        font-size: 30px;
         font-weight: 900;
-        line-height: 1.15;
-        margin-bottom: 14px;
+        line-height: 1.1;
+        margin-bottom: 6px;
       }
 
       .hero-food-list {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-        margin-bottom: 14px;
+        display: flex;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .hero-food-list > * {
+        flex: 1 1 0;
+        min-width: 0;
       }
 
       .hero-food {
         background: #ffffff;
         border: 2px solid #ead6aa;
         border-radius: var(--radius-md);
-        padding: 12px;
+        padding: 6px 12px;
       }
 
       .hero-food-label {
         color: var(--color-text-secondary);
-        font-size: 18px;
+        font-size: 16px;
         font-weight: 700;
         margin-bottom: 2px;
       }
 
       .hero-food-name {
         color: var(--color-text);
-        font-size: 28px;
+        font-size: 24px;
         font-weight: 900;
-        line-height: 1.2;
+        line-height: 1.15;
       }
 
       .hero-safe-note {
@@ -970,11 +981,11 @@
         border-left: 5px solid #5b8a72;
         border-radius: var(--radius-sm);
         color: #234d3a;
-        font-size: 22px;
+        font-size: 16px;
         font-weight: 800;
-        line-height: 1.35;
-        padding: 10px 12px;
-        margin-bottom: 14px;
+        line-height: 1.25;
+        padding: 6px 12px;
+        margin-bottom: 8px;
       }
 
       .hero-actions {
@@ -996,10 +1007,10 @@
         color: var(--color-text);
         cursor: pointer;
         font-family: inherit;
-        font-size: 24px;
+        font-size: 20px;
         font-weight: 900;
-        min-height: 58px;
-        padding: 10px 18px;
+        min-height: 42px;
+        padding: 6px 16px;
       }
 
       .elder-btn.primary {
@@ -1040,10 +1051,10 @@
         background: #f6f7fc;
         border-radius: var(--radius-md);
         color: var(--color-text);
-        font-size: 22px;
+        font-size: 17px;
         font-weight: 800;
-        line-height: 1.35;
-        padding: 12px 16px;
+        line-height: 1.25;
+        padding: 6px 16px;
       }
 
       .caregiver-switch {
@@ -1086,7 +1097,15 @@
       }
 
       body[data-mode="elder"] .reminder-row {
-        height: 22vh;
+        height: 100%;
+      }
+
+      #reminder-section {
+        flex: 0 0 14vh;
+        min-height: 0;
+      }
+      #reminder-section .reminder-row {
+        height: 100%;
       }
 
       @media (max-width: 760px) {

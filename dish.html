@@ -89,7 +89,8 @@
         border: 2.5px solid;
         line-height: 1.15;
         min-width: 0;
-        overflow: hidden;
+        overflow-wrap: break-word;
+        word-break: break-word;
         animation: breathe 3.5s ease-in-out infinite alternate;
       }
       .reminder-item:nth-child(1) {
@@ -202,61 +203,81 @@
       .meal-row {
         background: var(--color-surface);
         border-radius: var(--radius-md);
-        border: 2px solid var(--color-divider);
+        border: 2.5px solid var(--color-divider);
         box-shadow: var(--shadow-sm);
         overflow: hidden;
         transition: border-color 0.2s;
+        /* 明显的呼吸：光晕起伏 + 轻微缩放，强度由各餐 --glow 控制 */
+        animation: meal-breathe 3.2s ease-in-out infinite;
       }
       .meal-row.current {
         box-shadow: var(--shadow-md);
       }
 
-      /* Breakfast: warm amber */
+      /* 呼吸动画：三餐错相位，起伏感清晰但不刺眼 */
+      @keyframes meal-breathe {
+        0%, 100% {
+          box-shadow: 0 0 4px 0 var(--glow);
+          transform: scale(0.992);
+        }
+        50% {
+          box-shadow: 0 0 26px 6px var(--glow);
+          transform: scale(1.012);
+        }
+      }
+
+      /* Breakfast: warm amber（加深 + 提高区分度） */
       .meal-breakfast {
-        border-color: #e8c876;
+        border-color: #d4a017;
+        --glow: rgba(212, 160, 23, 0.85);
+        animation-delay: 0s;
       }
       .meal-breakfast .meal-header {
-        background: #fffbf0;
+        background: #fdecb8;
       }
       .meal-breakfast.current {
-        border-color: #d4a017;
-        border-width: 2.5px;
+        border-color: #a9760b;
+        border-width: 3px;
       }
       .meal-breakfast.current .meal-header {
-        background: #fff3cd;
-        border-bottom-color: #e8c876;
+        background: #fbdc85;
+        border-bottom-color: #d4a017;
       }
 
-      /* Lunch: fresh green */
+      /* Lunch: fresh green（加深 + 提高区分度） */
       .meal-lunch {
-        border-color: #8fbc8f;
+        border-color: #4f9d69;
+        --glow: rgba(79, 157, 105, 0.85);
+        animation-delay: 1.5s;
       }
       .meal-lunch .meal-header {
-        background: #f4faf6;
+        background: #d2ecd9;
       }
       .meal-lunch.current {
-        border-color: #5b8a72;
-        border-width: 2.5px;
+        border-color: #357a4c;
+        border-width: 3px;
       }
       .meal-lunch.current .meal-header {
-        background: #d4e8dc;
-        border-bottom-color: #8fbc8f;
+        background: #b6e0c2;
+        border-bottom-color: #4f9d69;
       }
 
-      /* Dinner: calm indigo */
+      /* Dinner: calm indigo（加深 + 提高区分度） */
       .meal-dinner {
-        border-color: #9ba4c9;
+        border-color: #5a6cbf;
+        --glow: rgba(90, 108, 191, 0.85);
+        animation-delay: 3s;
       }
       .meal-dinner .meal-header {
-        background: #f4f5fb;
+        background: #d4d9f4;
       }
       .meal-dinner.current {
-        border-color: #6b7db3;
-        border-width: 2.5px;
+        border-color: #3f51a8;
+        border-width: 3px;
       }
       .meal-dinner.current .meal-header {
-        background: #d8ddf0;
-        border-bottom-color: #9ba4c9;
+        background: #bcc4ee;
+        border-bottom-color: #5a6cbf;
       }
 
       .meal-header {
@@ -351,6 +372,14 @@
       }
       .item-cat.fixed {
         background: #e8a92b;
+        color: #fff;
+      }
+      .item-cat.cold {
+        background: #5aa6a0;
+        color: #fff;
+      }
+      .item-cat.soup {
+        background: #d98841;
         color: #fff;
       }
 
@@ -910,7 +939,9 @@
             <span class="meal-label">午餐</span>
             <div class="meal-actions">
               <button class="btn-meal-swap" onclick="swapMeal('午', 'staple')">换主食</button>
-              <button class="btn-meal-swap" onclick="swapMeal('午', 'dish')">换菜品</button>
+              <button class="btn-meal-swap" onclick="swapMeal('午', 'dish')">换热菜</button>
+              <button class="btn-meal-swap" onclick="swapMeal('午', 'soup')">换汤</button>
+              <button class="btn-meal-swap" onclick="swapMeal('午', 'cold')">换凉菜</button>
             </div>
           </div>
           <div class="meal-compact" id="compact-午"></div>
@@ -938,7 +969,7 @@
             <div class="dinner-tip-title">🌙 晚上难受怎么避免</div>
             <ul class="dinner-tip-list">
               <li>晚餐<strong>七分饱、要吃早</strong>，睡前 3 小时吃完</li>
-              <li><strong>少油、少盐、不吃生冷</strong>，排骨/咸蛋/花生留到白天</li>
+              <li><strong>少油、少盐、不吃生冷</strong>，排骨/咸蛋/油炒菜留到白天</li>
               <li>饭后<strong>慢走 10 分钟</strong>，不要马上躺下</li>
               <li>睡觉<strong>垫高枕头</strong>，减少反流烧心</li>
               <li>有胰酶（如得每通）<strong>随餐按医嘱吃</strong>，别漏</li>
@@ -983,14 +1014,14 @@
           tip: '排骨选小排，肉嫩易嚼',
         },
         {
-          name: '胡萝卜鸡茸粥',
+          name: '香菇肉末粥',
           category: '主食',
           time: '30分钟',
           steps: 3,
           method: '煮',
-          ingredients: ['大米半杯', '鸡胸肉80g', '胡萝卜半根', '姜丝', '盐少许'],
-          instructions: ['大米洗净加水，大火煮开后转小火熬20分钟', '鸡胸肉剁成茸，胡萝卜擦细丝', '粥快好时加入鸡茸和胡萝卜丝，搅散煮5分钟，加盐调味'],
-          tip: '鸡茸入锅后要快速搅散，防止结块',
+          ingredients: ['大米半杯', '猪里脊80g', '鲜香菇2朵', '姜丝', '盐少许', '葱花'],
+          instructions: ['大米洗净加水，大火煮开后转小火熬20分钟', '里脊肉剁末，香菇切细丁', '粥快好时加入肉末和香菇丁，搅散煮5分钟，加盐撒葱花'],
+          tip: '香菇和肉末菜场现成好买，鲜得很，比鸡茸省事',
         },
         {
           name: '冬瓜蒸肉末',
@@ -1013,14 +1044,58 @@
           tip: '小米粥养胃易消化，可作早餐',
         },
         {
+          name: '棒子面粥',
+          category: '主食',
+          time: '30分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['大米2勺', '小米2勺', '玉米粉3勺', '高粱粉1勺', '水适量'],
+          instructions: [
+            '大米、小米淘洗干净，加水大火煮开转小火熬15分钟',
+            '玉米粉、高粱粉加凉水调成无颗粒的稀糊',
+            '粥锅小火，边倒粉糊边搅拌，再熬10分钟至粘稠顺滑',
+          ],
+          tip: '苏北家常晚餐粥。粉糊一定先用凉水调开再下锅，否则结疙瘩。奶奶吃就多熬一会熬得更烂更稀，粗粮纤维粗、别太稠',
+        },
+        {
           name: '白萝卜鲫鱼汤',
-          category: '菜',
+          category: '汤',
           time: '30分钟',
           steps: 3,
           method: '煮',
           ingredients: ['鲫鱼1条', '白萝卜200g', '姜3片', '葱段', '盐少许'],
           instructions: ['鲫鱼洗净，白萝卜去皮切薄片', '锅中放少许油，姜片爆香，鲫鱼两面略煎', '加足量开水，放入白萝卜片，大火煮15分钟至汤白，加盐和葱花'],
           tip: '加开水是汤白的关键，不要加冷水',
+        },
+        {
+          name: '番茄蛋汤',
+          category: '汤',
+          time: '10分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['番茄2个', '鸡蛋2个', '葱花', '盐少许', '香油几滴'],
+          instructions: ['番茄去皮切块，鸡蛋打散', '锅中少油炒番茄出汁，加适量开水煮开', '淋入蛋液搅成蛋花，加盐、香油、葱花'],
+          tip: '最家常的汤，开胃又暖胃。番茄去皮口感更好',
+        },
+        {
+          name: '紫菜虾皮蛋汤',
+          category: '汤',
+          time: '8分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['干紫菜1小块', '虾皮1小把', '鸡蛋1个', '葱花', '盐少许', '香油几滴'],
+          instructions: ['紫菜撕碎、虾皮冲洗一下放碗底，鸡蛋打散', '锅中水烧开淋入蛋花，冲入紫菜虾皮碗中，加盐、香油、葱花'],
+          tip: '虾皮本身咸，盐要少放。补碘补钙，撕碎好消化',
+        },
+        {
+          name: '西红柿土豆汤',
+          category: '汤',
+          time: '20分钟',
+          steps: 3,
+          method: '煮',
+          ingredients: ['番茄2个', '土豆1个', '葱花', '盐少许'],
+          instructions: ['番茄去皮切块，土豆去皮切小丁', '锅中少油炒番茄出汁，加水放土豆丁', '中小火煮15分钟至土豆软烂，加盐撒葱花'],
+          tip: '土豆煮到软烂，汤稠暖胃，老人喝着舒服',
         },
         {
           name: '西葫芦炒鸡蛋',
@@ -1044,7 +1119,7 @@
         },
         {
           name: '娃娃菜豆腐汤',
-          category: '菜',
+          category: '汤',
           time: '10分钟',
           steps: 2,
           method: '煮',
@@ -1073,14 +1148,14 @@
           tip: '勾薄芡让口感更滑嫩',
         },
         {
-          name: '胡萝卜蒸肉末',
+          name: '丝瓜蒸肉末',
           category: '菜',
           time: '15分钟',
           steps: 3,
           method: '清蒸',
-          ingredients: ['胡萝卜1根', '里脊肉100g', '姜末', '盐少许'],
-          instructions: ['胡萝卜去皮擦细丝铺盘底', '里脊肉剁末加姜末盐拌匀', '肉末铺在胡萝卜丝上，上锅蒸12分钟'],
-          tip: '肉末汁渗入胡萝卜丝，清甜又营养',
+          ingredients: ['丝瓜2根', '里脊肉100g', '姜末', '盐少许'],
+          instructions: ['丝瓜去皮切段铺盘底', '里脊肉剁末加姜末盐拌匀', '肉末铺在丝瓜上，上锅蒸12分钟'],
+          tip: '丝瓜清甜多汁，蒸完入口即化，肉末鲜香',
         },
         {
           name: '里脊肉片粥',
@@ -1104,7 +1179,7 @@
         },
         {
           name: '菠菜蛋花汤',
-          category: '菜',
+          category: '汤',
           time: '8分钟',
           steps: 2,
           method: '煮',
@@ -1164,7 +1239,7 @@
         },
         {
           name: '白萝卜肉丸汤',
-          category: '菜',
+          category: '汤',
           time: '25分钟',
           steps: 3,
           method: '煮',
@@ -1174,7 +1249,7 @@
         },
         {
           name: '冬瓜虾仁汤',
-          category: '菜',
+          category: '汤',
           time: '12分钟',
           steps: 3,
           method: '煮',
@@ -1184,7 +1259,7 @@
         },
         {
           name: '茼蒿蛋花汤',
-          category: '菜',
+          category: '汤',
           time: '8分钟',
           steps: 2,
           method: '煮',
@@ -1203,14 +1278,14 @@
           tip: '鸡肉和山药一起蒸，山药吸收肉汁更香',
         },
         {
-          name: '胡萝卜炒里脊',
+          name: '荷兰豆炒里脊',
           category: '菜',
           time: '12分钟',
           steps: 3,
           method: '清炒',
-          ingredients: ['里脊肉100g', '胡萝卜1根', '姜丝', '盐少许', '油少许'],
-          instructions: ['里脊肉切薄片，胡萝卜去皮切薄片', '少许油先炒肉片至变色盛出', '炒胡萝卜至软，倒回肉片翻匀加盐'],
-          tip: '胡萝卜切薄易熟，甜甜的老人喜欢',
+          ingredients: ['里脊肉100g', '荷兰豆150g', '姜丝', '盐少许', '油少许'],
+          instructions: ['里脊肉切薄片，荷兰豆撕筋焯水1分钟', '少许油先炒肉片至变色盛出', '炒荷兰豆，倒回肉片翻匀加盐'],
+          tip: '荷兰豆焯过水更脆嫩好嚼，清甜爽口',
         },
         {
           name: '白菜肉末粉丝煲',
@@ -1284,7 +1359,7 @@
         },
         {
           name: '生菜鱼片汤',
-          category: '菜',
+          category: '汤',
           time: '8分钟',
           steps: 3,
           method: '煮',
@@ -1313,13 +1388,13 @@
           tip: '金针菇切短一些，方便老人嚼',
         },
         {
-          name: '胡萝卜山药排骨汤',
-          category: '菜',
+          name: '山药排骨汤',
+          category: '汤',
           time: '40分钟',
           steps: 3,
           method: '煮',
-          ingredients: ['排骨200g', '胡萝卜1根', '山药150g', '姜3片', '盐少许'],
-          instructions: ['排骨焯水去血沫，洗净', '胡萝卜去皮切滚刀块，山药去皮切段', '排骨姜片加水大火煮开转小火炖30分钟，加入胡萝卜山药再炖10分钟，加盐'],
+          ingredients: ['排骨200g', '山药200g', '姜3片', '盐少许'],
+          instructions: ['排骨焯水去血沫，洗净', '山药去皮切段', '排骨姜片加水大火煮开转小火炖30分钟，加入山药再炖10分钟，加盐'],
           tip: '汤面上的浮油要撇干净',
         },
         {
@@ -1343,6 +1418,16 @@
           tip: '平菇焯水去掉土味，口感更滑',
         },
         {
+          name: '杏鲍菇炒肉片',
+          category: '菜',
+          time: '12分钟',
+          steps: 3,
+          method: '清炒',
+          ingredients: ['杏鲍菇2根', '里脊肉100g', '姜丝', '盐少许', '生抽1勺', '油适量'],
+          instructions: ['杏鲍菇切薄片，里脊肉切薄片', '热锅下油炒肉片至变色盛出', '炒杏鲍菇至软出香，倒回肉片，加盐和生抽翻匀'],
+          tip: '杏鲍菇菜场常见、耐放好做，切薄片炒软老人好嚼。奶奶吃就少油少盐',
+        },
+        {
           name: '花菜炒肉末',
           category: '菜',
           time: '12分钟',
@@ -1364,7 +1449,7 @@
         },
         {
           name: '萝卜丝鲫鱼汤',
-          category: '菜',
+          category: '汤',
           time: '25分钟',
           steps: 3,
           method: '煮',
@@ -1414,7 +1499,7 @@
         },
         {
           name: '番茄鱼片汤',
-          category: '菜',
+          category: '汤',
           time: '20分钟',
           steps: 3,
           method: '煮',
@@ -1494,7 +1579,7 @@
         },
         {
           name: '西葫芦肉末汤',
-          category: '菜',
+          category: '汤',
           time: '10分钟',
           steps: 3,
           method: '煮',
@@ -1524,7 +1609,7 @@
         },
         {
           name: '丝瓜鱼片汤',
-          category: '菜',
+          category: '汤',
           time: '12分钟',
           steps: 2,
           method: '煮',
@@ -1588,8 +1673,8 @@
           time: '30分钟',
           steps: 3,
           method: '煮',
-          ingredients: ['大米半杯', '鸡胸肉100g', '胡萝卜半根', '姜丝', '盐少许'],
-          instructions: ['大米洗净加水熬粥20分钟，期间搅拌防粘锅', '鸡胸肉剁成细茸，胡萝卜擦细丝', '粥快好时加入鸡茸和胡萝卜丝，搅散煮5分钟，加盐'],
+          ingredients: ['大米半杯', '鸡胸肉100g', '上海青2棵', '姜丝', '盐少许'],
+          instructions: ['大米洗净加水熬粥20分钟，期间搅拌防粘锅', '鸡胸肉剁成细茸，上海青切碎末', '粥快好时加入鸡茸搅散煮3分钟，再加青菜末煮2分钟，加盐'],
           tip: '鸡茸提前用少许水调开再下锅，不会结块',
         },
         {
@@ -1613,14 +1698,14 @@
           tip: '面条煮到筷子一夹就断的程度，老人吃起来不费力',
         },
         {
-          name: '鱼肉青菜粥',
+          name: '牛肉青菜粥',
           category: '主食',
           time: '25分钟',
           steps: 3,
           method: '煮',
-          ingredients: ['大米半杯', '鲈鱼肉80g', '上海青2棵', '姜丝', '盐少许'],
-          instructions: ['大米洗净加水熬粥20分钟', '鲈鱼肉去皮去刺切小片，上海青切碎末', '粥快好时放入鱼片和姜丝煮3分钟，加青菜末煮1分钟，加盐'],
-          tip: '鱼肉一定要检查干净没有刺再下锅',
+          ingredients: ['大米半杯', '牛里脊80g', '上海青2棵', '姜丝', '盐少许'],
+          instructions: ['大米洗净加水熬粥20分钟', '牛里脊剁末，上海青切碎末', '粥快好时放入牛肉末和姜丝煮3分钟，加青菜末煮1分钟，加盐'],
+          tip: '牛肉末菜场现成好买，补铁补蛋白。剁细一点煮透，老人好嚼',
         },
         {
           name: '玉米鸡蛋糊',
@@ -1638,9 +1723,9 @@
           time: '25分钟',
           steps: 3,
           method: '蒸',
-          ingredients: ['大米半杯', '里脊肉80g', '胡萝卜半根', '姜末', '盐少许', '生抽几滴'],
-          instructions: ['大米洗净加水（比平时煮饭多一点，约1:2.5）', '里脊肉剁成细末，加姜末盐生抽拌匀，胡萝卜切细末', '肉末和胡萝卜铺在米上，一起上锅蒸25分钟'],
-          tip: '水比正常米饭多，蒸出来更软烂',
+          ingredients: ['大米半杯', '里脊肉80g', '鲜香菇2朵', '姜末', '盐少许', '生抽几滴'],
+          instructions: ['大米洗净加水（比平时煮饭多一点，约1:2.5）', '里脊肉剁成细末，加姜末盐生抽拌匀，香菇切细末', '肉末和香菇铺在米上，一起上锅蒸25分钟'],
+          tip: '水比正常米饭多，蒸出来更软烂。香菇增鲜',
         },
         {
           name: '红枣桂圆小米粥',
@@ -1664,7 +1749,7 @@
         },
         {
           name: '凉拌萝卜丝',
-          category: '菜',
+          category: '凉菜',
           time: '5分钟',
           steps: 2,
           method: '凉拌',
@@ -1674,7 +1759,7 @@
         },
         {
           name: '蒜泥黄瓜',
-          category: '菜',
+          category: '凉菜',
           time: '5分钟',
           steps: 2,
           method: '凉拌',
@@ -1683,14 +1768,94 @@
           tip: '蒜少放一点提味即可，不要太多刺激肠胃。天热吃着特别清爽',
         },
         {
-          name: '水煮花生',
+          name: '清炒菠菜',
           category: '菜',
-          time: '30分钟',
+          time: '6分钟',
           steps: 2,
-          method: '煮',
-          ingredients: ['生花生米100g', '八角1颗', '盐少许'],
-          instructions: ['花生米洗净，加水和八角', '大火煮开转小火煮25分钟至软面，加少许盐浸泡10分钟入味'],
-          tip: '一次多煮一些，冷藏能吃两三天。比油炸花生健康太多',
+          method: '清炒',
+          ingredients: ['菠菜300g', '蒜2瓣', '盐少许', '油少许'],
+          instructions: ['菠菜焯水30秒去草酸捞出', '热锅少油爆香蒜，下菠菜快炒，加盐'],
+          tip: '焯过水的菠菜炒得快、好嚼。早餐配粥清爽',
+        },
+        {
+          name: '清炒空心菜',
+          category: '菜',
+          time: '6分钟',
+          steps: 2,
+          method: '清炒',
+          ingredients: ['空心菜300g', '蒜2瓣', '盐少许', '油少许'],
+          instructions: ['空心菜洗净切段，梗叶分开', '热锅少油爆香蒜，先下梗炒软再下叶，加盐快炒'],
+          tip: '梗先下、叶后下，老人吃的话多炒一会更软',
+        },
+        {
+          name: '清炒小青菜',
+          category: '菜',
+          time: '6分钟',
+          steps: 2,
+          method: '清炒',
+          ingredients: ['上海青300g', '蒜2瓣', '盐少许', '油少许'],
+          instructions: ['上海青洗净切段', '热锅少油爆香蒜，下青菜炒软，加盐'],
+          tip: '最家常的早餐配粥菜，软嫩清甜',
+        },
+        {
+          name: '蒜蓉豆芽',
+          category: '菜',
+          time: '6分钟',
+          steps: 2,
+          method: '清炒',
+          ingredients: ['绿豆芽300g', '蒜2瓣', '盐少许', '油少许'],
+          instructions: ['豆芽洗净掐去根须', '热锅少油爆香蒜，下豆芽大火快炒至软，加盐'],
+          tip: '豆芽要炒熟透，清爽好消化',
+        },
+        {
+          name: '清炒菊花脑',
+          category: '菜',
+          time: '6分钟',
+          steps: 2,
+          method: '清炒',
+          ingredients: ['菊花脑200g', '蒜1瓣', '盐少许', '油少许'],
+          instructions: ['菊花脑洗净', '热锅少油爆香蒜，下菊花脑快炒至软，加盐'],
+          tip: '南京一带夏天常吃，清热开胃。也可做菊花脑蛋汤',
+        },
+        {
+          name: '清炒生菜',
+          category: '菜',
+          time: '5分钟',
+          steps: 2,
+          method: '清炒',
+          ingredients: ['生菜1棵', '蒜2瓣', '盐少许', '油少许'],
+          instructions: ['生菜洗净撕大片', '热锅少油爆香蒜，下生菜快炒至软，加盐'],
+          tip: '炒得快、出锅快，清爽不油腻',
+        },
+        {
+          name: '酸黄瓜',
+          category: '菜',
+          time: '5分钟',
+          steps: 1,
+          method: '凉拌',
+          ingredients: ['腌酸黄瓜1根'],
+          instructions: ['酸黄瓜切片装盘即可（市售或自家腌的）'],
+          tip: '开胃下粥的腌菜。咸酸，奶奶少吃、可冲水冲淡盐分；爷爷正常',
+        },
+        {
+          name: '拌大头菜',
+          category: '菜',
+          time: '5分钟',
+          steps: 2,
+          method: '凉拌',
+          ingredients: ['腌大头菜100g', '香油几滴'],
+          instructions: ['大头菜切丝，太咸先冲水泡一下挤干', '淋香油拌匀'],
+          tip: '咸味重，配粥一点点就够。奶奶少吃、先冲淡；爷爷正常',
+        },
+        {
+          name: '榨菜',
+          category: '菜',
+          time: '3分钟',
+          steps: 1,
+          method: '凉拌',
+          ingredients: ['榨菜1小包'],
+          instructions: ['榨菜切丝装盘（太咸可冲水冲淡）'],
+          tip: '最方便的下粥腌菜。盐分很高，奶奶尝几口就行；爷爷正常',
         },
         {
           name: '酱黄豆',
@@ -1704,13 +1869,53 @@
         },
         {
           name: '凉拌海带丝',
-          category: '菜',
+          category: '凉菜',
           time: '8分钟',
           steps: 2,
           method: '凉拌',
           ingredients: ['干海带丝20g', '蒜1瓣（捣泥）', '生抽半勺', '醋几滴', '香油2滴'],
           instructions: ['海带丝温水泡发，开水焯1分钟捞出过凉', '加蒜泥、生抽、醋、香油拌匀'],
           tip: '海带丝富含碘和膳食纤维，泡发后一定要焯水去掉腥味',
+        },
+        {
+          name: '凉拌黑木耳',
+          category: '凉菜',
+          time: '10分钟',
+          steps: 2,
+          method: '凉拌',
+          ingredients: ['干黑木耳15g', '蒜末少许', '生抽半勺', '醋几滴', '香油2滴'],
+          instructions: ['木耳温水泡发洗净，撕小朵，开水焯2分钟捞出过凉', '加蒜末、生抽、醋、香油拌匀'],
+          tip: '木耳一定要焯熟透。补铁、膳食纤维多，清爽开胃',
+        },
+        {
+          name: '姜汁菠菜',
+          category: '凉菜',
+          time: '8分钟',
+          steps: 2,
+          method: '凉拌',
+          ingredients: ['菠菜200g', '姜末', '生抽半勺', '醋几滴', '香油2滴'],
+          instructions: ['菠菜开水焯1分钟捞出过凉，挤干切段', '姜末加生抽、醋、香油调汁，淋在菠菜上拌匀'],
+          tip: '菠菜焯水去草酸，姜末暖胃，比生凉拌更适合老人',
+        },
+        {
+          name: '豆腐丝拌黄瓜',
+          category: '凉菜',
+          time: '8分钟',
+          steps: 2,
+          method: '凉拌',
+          ingredients: ['豆腐丝100g', '黄瓜半根', '蒜末少许', '生抽半勺', '香油2滴'],
+          instructions: ['豆腐丝开水焯1分钟捞出过凉，黄瓜切丝', '加蒜末、生抽、香油拌匀'],
+          tip: '豆腐丝补植物蛋白，焯过水更干净。配粥配饭都清爽',
+        },
+        {
+          name: '凉拌西红柿',
+          category: '凉菜',
+          time: '5分钟',
+          steps: 2,
+          method: '凉拌',
+          ingredients: ['西红柿2个', '糖少许（可选）'],
+          instructions: ['西红柿洗净去皮切块', '装盘，喜欢甜口撒少许糖，不放也清爽'],
+          tip: '最简单的凉菜，开胃生津。奶奶吃就别放糖，肠胃怕凉的话室温放一会再吃',
         },
         {
           name: '蒸咸鸭蛋',
@@ -1746,6 +1951,100 @@
           ],
           tip: '一次多包些冷冻起来，早上直接下水煮就是一顿。馅少一点好消化，不要包大饺子',
         },
+        {
+          name: '软白米饭',
+          category: '主食',
+          time: '30分钟',
+          steps: 2,
+          method: '煮',
+          ingredients: ['大米1杯', '水（比平时多一点，约1:1.5）'],
+          instructions: ['大米淘洗干净，加水（比平时煮饭多一点点）', '电饭煲正常煮，跳闸后再焖10分钟，盛出即可'],
+          tip: '最家常的主食。水多放一点煮得软一些，老人更好嚼好消化',
+        },
+        {
+          name: '青椒肉丝',
+          category: '菜',
+          time: '12分钟',
+          steps: 3,
+          method: '清炒',
+          ingredients: ['里脊肉150g', '青椒2个', '姜丝', '盐少许', '生抽1勺', '油适量'],
+          instructions: [
+            '里脊肉切细丝，加少许盐和生抽抓匀腌10分钟，青椒去籽切丝',
+            '热锅下油炒肉丝至变色盛出',
+            '余油炒青椒至断生，倒回肉丝，加盐和生抽翻匀',
+          ],
+          tip: '家常下饭菜。奶奶吃就少放油盐、青椒切细炒软一点；爷爷正常做',
+        },
+        {
+          name: '芹菜炒香干',
+          category: '菜',
+          time: '12分钟',
+          steps: 3,
+          method: '清炒',
+          ingredients: ['芹菜2根', '香干3块', '姜丝', '盐少许', '生抽1勺', '油适量'],
+          instructions: [
+            '芹菜去筋切段焯水1分钟，香干切条',
+            '热锅下油，爆香姜丝，下香干煸炒',
+            '加入芹菜翻炒，加盐和生抽炒匀',
+          ],
+          tip: '芹菜焯过水更软更好嚼。奶奶少油少盐版；香干补植物蛋白',
+        },
+        {
+          name: '番茄炒蛋',
+          category: '菜',
+          time: '10分钟',
+          steps: 3,
+          method: '清炒',
+          ingredients: ['番茄2个', '鸡蛋3个', '盐少许', '糖少许', '油适量'],
+          instructions: [
+            '番茄切块，鸡蛋打散加少许盐',
+            '热锅下油炒蛋至凝固盛出',
+            '余油炒番茄出汁，倒回鸡蛋，加少许盐和糖炒匀',
+          ],
+          tip: '老少都爱的家常菜，番茄开胃。奶奶吃就少油，糖可不放',
+        },
+        {
+          name: '土豆烧肉',
+          category: '菜',
+          time: '35分钟',
+          steps: 3,
+          method: '炖',
+          ingredients: ['五花肉或里脊200g', '土豆2个', '姜片', '生抽2勺', '老抽几滴', '冰糖2颗', '盐少许'],
+          instructions: [
+            '肉切块焯水，土豆去皮切滚刀块',
+            '锅中少油下肉煸炒，加姜片、生抽、老抽、冰糖炒上色',
+            '加水没过，大火烧开转小火炖20分钟，下土豆再炖15分钟收汁',
+          ],
+          tip: '老人爱吃的下饭菜。奶奶吃就用里脊不用五花、少酱油、撇掉浮油、只吃几块',
+        },
+        {
+          name: '黄瓜炒蛋',
+          category: '菜',
+          time: '10分钟',
+          steps: 3,
+          method: '清炒',
+          ingredients: ['黄瓜1根', '鸡蛋2个', '盐少许', '油适量'],
+          instructions: [
+            '黄瓜切片，鸡蛋打散加少许盐',
+            '热锅下油炒蛋盛出',
+            '余油炒黄瓜片至断生，倒回鸡蛋，加盐翻匀',
+          ],
+          tip: '清爽不油腻，黄瓜炒着吃也好消化',
+        },
+        {
+          name: '肉末茄子',
+          category: '菜',
+          time: '15分钟',
+          steps: 3,
+          method: '炖',
+          ingredients: ['茄子2根', '里脊肉100g', '蒜末', '姜末', '生抽1勺', '盐少许', '油适量'],
+          instructions: [
+            '茄子切条，里脊肉剁末',
+            '热锅下油炒肉末至变色，加蒜末姜末爆香',
+            '下茄子翻炒，加少许水和生抽，小火焖8分钟至茄子软烂',
+          ],
+          tip: '茄子很吸油，奶奶吃就先把茄子蒸软再炒、少放油；焖烂了好嚼',
+        },
       ];
 
       var staples = recipes.filter(function (r) {
@@ -1754,10 +2053,16 @@
       var dishes = recipes.filter(function (r) {
         return r.category === '菜';
       });
+      var coldDishes = recipes.filter(function (r) {
+        return r.category === '凉菜';
+      });
+      var soups = recipes.filter(function (r) {
+        return r.category === '汤';
+      });
 
       var mealState = {
         早: { stapleIdx: -1, dishIdx: -1, stapleHistory: [], dishHistory: [] },
-        午: { stapleIdx: -1, dishIdx: -1, stapleHistory: [], dishHistory: [] },
+        午: { stapleIdx: -1, dishIdx: -1, coldIdx: -1, soupIdx: -1, stapleHistory: [], dishHistory: [], coldHistory: [], soupHistory: [] },
         晚: { stapleIdx: -1, dishIdx: -1, stapleHistory: [], dishHistory: [] },
       };
 
@@ -1765,13 +2070,31 @@
         var n = recipe.name;
         if (recipe.category === '主食') {
           if (/粥|糊|羹|粉/.test(n)) return ['早', '晚'];
-          if (/面|馄饨|水饺/.test(n)) return ['早', '午', '晚'];
-          return ['午', '晚'];
+          // 淮安人午饭吃米饭：面/馄饨/饺、泥糊糕饼都不当午饭，只留早晚
+          if (/面|馄饨|水饺|泥|糕|饼/.test(n)) return ['早', '晚'];
+          return ['午', '晚']; // 剩下的就是米饭/软饭类
         }
+        // 凉菜：只在午餐出现
+        if (recipe.category === '凉菜') return ['午'];
+        // 汤：独立成一类，只在午餐出现（午餐热汤位）
+        if (recipe.category === '汤') return ['午'];
+        // 煮的羹这类"汤水菜"不排早餐——早餐主食多是粥糊，避免水配水
+        if (/羹/.test(n) && recipe.method !== '清蒸' && recipe.method !== '蒸') return ['午', '晚'];
+        // 咸鸭蛋、腌菜是配粥的咸味佐菜，只在早餐配粥出现
+        if (/咸鸭蛋|酸黄瓜|大头菜|榨菜/.test(n)) return ['早'];
         // 高盐/高脂/生冷佐粥小菜 + 整蛋（蛋黄偏脂）：只在早/午出现，晚餐清淡不排，减少晚间消化负担
-        if (/咸鸭蛋|花生|酱黄豆|凉拌|海带|蒜泥/.test(n)) return ['早', '午'];
-        if (/蛋羹|蒸蛋|豆腐/.test(n)) return ['早', '午', '晚'];
+        if (/酱黄豆|凉拌|海带|蒜泥/.test(n)) return ['早', '午'];
+        // 蒸蛋羹/蒸蛋/豆腐类：清淡好做。但要处理生荤料（排骨/牛肉/肉末/鱼肠）的太费事，不当早餐
+        if (/蛋羹|蒸蛋|豆腐/.test(n)) {
+          if (/排骨|牛肉|肉末|鱼肠/.test(n)) return ['午', '晚'];
+          return ['早', '午', '晚'];
+        }
         if (/汤/.test(n)) return ['午', '晚'];
+        var ing = recipe.ingredients.join('');
+        // 清炒纯素时蔬（不含荤腥）：清爽好做，早午晚都能上，早餐配粥正合适
+        if (recipe.method === '清炒' && !/肉|鱼|虾|蛋|鸡|牛|猪|肝|香干/.test(n + ing)) return ['早', '午', '晚'];
+        // 重口热菜（炖/红烧，或多油多酱的清炒）只排午餐——晚餐保持清淡，奶奶晚上好受些
+        if (recipe.method === '炖' || /烧/.test(n) || (recipe.method === '清炒' && /油适量|老抽|冰糖|糖少许|生抽1勺|生抽2勺/.test(ing))) return ['午'];
         return ['午', '晚'];
       }
 
@@ -1784,7 +2107,6 @@
       var INGREDIENT_MAP = {
         南瓜: '南瓜',
         山药: '山药',
-        胡萝卜: '胡萝卜',
         菠菜: '菠菜',
         冬瓜: '冬瓜',
         西葫芦: '西葫芦',
@@ -1855,7 +2177,16 @@
         return keys;
       }
 
+      // 汤水类：粥/糊/汤，以及"煮"出来的羹（稀的）。蒸出来的蛋羹是成型的，不算汤水
+      function isWet(r) {
+        if (/粥|糊|汤/.test(r.name)) return true;
+        if (/羹/.test(r.name) && r.method !== '清蒸' && r.method !== '蒸') return true;
+        return false;
+      }
+
       function hasConflict(a, b) {
+        // 别让"汤水配汤水"：稀粥/糊配上汤菜，等于水配水，没法吃
+        if (isWet(a) && isWet(b)) return true;
         var aKeys = getKeyIngredients(a);
         var bKeys = getKeyIngredients(b);
         for (var i = 0; i < aKeys.length; i++) {
@@ -1890,17 +2221,29 @@
         if (/鸡|鱼|虾|肉|蛋|豆腐|牛肉|猪肝/.test(n)) tags.push({ cls: 'protein', label: '高蛋白' });
         if (/粥|糊|羹|泥|蒸蛋|豆腐|汤/.test(n) && recipe.method !== '清炒' && recipe.method !== '炖') tags.push({ cls: 'digest', label: '易消化' });
         if (/猪肝|菠菜|红枣/.test(n)) tags.push({ cls: 'iron', label: '补铁' });
-        if (/西兰花|花菜|菠菜|白菜|青菜|秋葵|胡萝卜|芹菜|茼蒿|金针菇|平菇|香菇|南瓜/.test(n)) tags.push({ cls: 'fiber', label: '高纤维' });
+        if (/西兰花|花菜|菠菜|白菜|青菜|秋葵|芹菜|茼蒿|金针菇|平菇|香菇|南瓜|荷兰豆/.test(n)) tags.push({ cls: 'fiber', label: '高纤维' });
         if (/豆腐|虾|排骨|鲫鱼|银耳/.test(n)) tags.push({ cls: 'calcium', label: '补钙' });
         if (/牛肉|猪里脊|鸡胸|鲈鱼|蛋白|蒸/.test(n) && !/排骨/.test(n) && !/五花/.test(ing)) tags.push({ cls: 'lowfat', label: '低脂' });
         return tags.slice(0, 3);
       }
 
       // 奶奶（胰腺术后）慎食：高脂、高盐或生冷刺激，标注后界面提示减量/不吃，爷爷可正常
+      // 奶奶（胰腺术后）按风险分级提醒，不禁菜、只提示掌握分寸；爷爷可正常吃
       function getCaution(recipe) {
         var n = recipe.name;
-        if (/排骨|猪肝|咸鸭蛋|花生|酱黄豆/.test(n)) return '奶奶减量';
-        if (/凉拌|海带|蒜泥|黄瓜/.test(n)) return '奶奶忌生冷';
+        var ing = recipe.ingredients.join('');
+        // 腌菜高盐：奶奶尝几口、可冲淡
+        if (/酸黄瓜|大头菜|榨菜/.test(n)) return '奶奶少吃';
+        // 高脂 / 高胆固醇：量要少
+        if (/排骨|猪肝|咸鸭蛋|酱黄豆|五花/.test(n) || /五花/.test(ing)) return '奶奶减量';
+        // 生冷凉拌：术后肠胃怕凉
+        if (/凉拌|海带|蒜泥/.test(n)) return '奶奶忌生冷';
+        // 家常炒/炖/烧 + 油盐酱偏多：提醒少油少盐
+        if (
+          (recipe.method === '清炒' || recipe.method === '炖' || /烧/.test(n)) &&
+          /油适量|老抽|冰糖|糖少许|生抽\d|生抽1勺|生抽2勺/.test(ing)
+        )
+          return '奶奶少油少盐';
         return '';
       }
 
@@ -1914,6 +2257,13 @@
           idx = Math.floor(Math.random() * list.length);
           attempts++;
         } while (attempts < 200 && (idx === todayIdx || history.indexOf(idx) !== -1 || (otherRecipe && hasConflict(list[idx], otherRecipe))));
+        // 随机没撞到合适的：按顺序兜底，放宽“今天/历史”但绝不放宽“冲突”约束（避免水配水）
+        if (otherRecipe && hasConflict(list[idx], otherRecipe)) {
+          for (var k = 0; k < list.length; k++) {
+            if (k !== todayIdx && !hasConflict(list[k], otherRecipe)) return { idx: k, recipe: list[k] };
+          }
+          return null; // 实在找不到不冲突的，就不换（按钮提示“仅此一道”）
+        }
         return { idx: idx, recipe: list[idx] };
       }
 
@@ -1924,86 +2274,86 @@
         return dayOfYear % list.length;
       }
 
-      function renderCompact(meal, staple, dish) {
-        var el = document.getElementById('compact-' + meal);
-        if (!el) return;
-        var sStars = getDifficulty(staple);
-        var sTagStr = getNutritionTags(staple)
+      // 生成一行紧凑菜品的 HTML，字段与 7 列 grid 对齐
+      function compactItem(catLabel, catCls, recipe) {
+        var tagStr = getNutritionTags(recipe)
           .map(function (t) {
             return t.label;
           })
           .join(' · ');
-        var dStars = getDifficulty(dish);
-        var dTagStr = getNutritionTags(dish)
-          .map(function (t) {
-            return t.label;
-          })
-          .join(' · ');
-        el.innerHTML =
+        var caution = getCaution(recipe);
+        var steps = recipe.steps ? recipe.steps + '步' : '';
+        return (
           '<div class="meal-item">' +
-          '<span class="item-cat staple">主食</span>' +
+          '<span class="item-cat ' +
+          catCls +
+          '">' +
+          catLabel +
+          '</span>' +
           '<span class="item-name">' +
-          staple.name +
+          recipe.name +
+          (caution ? ' <span class="item-caution">⚠' + caution + '</span>' : '') +
           '</span>' +
           '<span class="item-meta">' +
           '<span class="meta-time">' +
-          staple.time +
+          recipe.time +
           '</span><span class="sep">·</span>' +
           '<span class="meta-steps">' +
-          staple.steps +
-          '步</span><span class="sep">·</span>' +
+          steps +
+          '</span><span class="sep">·</span>' +
           '<span class="meta-method">' +
-          staple.method +
+          recipe.method +
           '</span><span class="sep">·</span>' +
           '<span class="meta-stars">' +
-          sStars +
+          getDifficulty(recipe) +
           '</span>' +
-          (sTagStr ? '<span class="sep">·</span>' + sTagStr : '') +
+          (tagStr ? '<span class="sep">·</span><span>' + tagStr + '</span>' : '') +
           '</span>' +
-          '</div>' +
-          '<div class="meal-item">' +
-          '<span class="item-cat dish">菜品</span>' +
-          '<span class="item-name">' +
-          dish.name +
-          (getCaution(dish) ? ' <span class="item-caution">⚠' + getCaution(dish) + '</span>' : '') +
-          '</span>' +
-          '<span class="item-meta">' +
-          '<span class="meta-time">' +
-          dish.time +
-          '</span><span class="sep">·</span>' +
-          '<span class="meta-steps">' +
-          dish.steps +
-          '步</span><span class="sep">·</span>' +
-          '<span class="meta-method">' +
-          dish.method +
-          '</span><span class="sep">·</span>' +
-          '<span class="meta-stars">' +
-          dStars +
-          '</span>' +
-          (dTagStr ? '<span class="sep">·</span>' + dTagStr : '') +
-          '</span>' +
-          '</div>' +
-          '<div class="meal-item">' +
-          '<span class="item-cat fixed">固定</span>' +
-          '<span class="item-name">水煮蛋白 1-2 个</span>' +
-          '<span class="item-meta">' +
-          '<span class="meta-time">10分钟</span><span class="sep">·</span>' +
-          '<span class="meta-steps"></span><span class="sep">·</span>' +
-          '<span class="meta-method">煮</span><span class="sep">·</span>' +
-          '<span class="meta-stars">★</span>' +
-          '<span class="sep">·</span><span>高蛋白 · 低脂</span>' +
-          '</span>' +
-          '</div>';
+          '</div>'
+        );
       }
 
-      function renderDetail(meal, staple, dish) {
+      // 每餐固定的水煮蛋白行（写死，不进轮换池）
+      var FIXED_EGGWHITE_HTML =
+        '<div class="meal-item">' +
+        '<span class="item-cat fixed">固定</span>' +
+        '<span class="item-name">水煮蛋白 1-2 个</span>' +
+        '<span class="item-meta">' +
+        '<span class="meta-time">10分钟</span><span class="sep">·</span>' +
+        '<span class="meta-steps"></span><span class="sep">·</span>' +
+        '<span class="meta-method">煮</span><span class="sep">·</span>' +
+        '<span class="meta-stars">★</span>' +
+        '<span class="sep">·</span><span>高蛋白 · 低脂</span>' +
+        '</span>' +
+        '</div>';
+
+      function renderCompact(meal, staple, dish, cold, soup) {
+        var el = document.getElementById('compact-' + meal);
+        if (!el) return;
+        var html = compactItem('主食', 'staple', staple);
+        // 午餐把“菜品”叫“热菜”，并额外排热汤、凉菜
+        if (meal === '午') {
+          html += compactItem('热菜', 'dish', dish);
+          if (soup) html += compactItem('热汤', 'soup', soup);
+          if (cold) html += compactItem('凉菜', 'cold', cold);
+        } else {
+          html += compactItem('菜品', 'dish', dish);
+        }
+        html += FIXED_EGGWHITE_HTML;
+        el.innerHTML = html;
+      }
+
+      function renderDetail(meal, staple, dish, cold, soup) {
         var el = document.getElementById('detail-' + meal);
         if (!el) return;
         var html = '';
-        [
+        var cards = [
           ['staple-card', staple, '🥄'],
           ['dish-card', dish, '🍽️'],
-        ].forEach(function (item) {
+        ];
+        if (meal === '午' && soup) cards.push(['dish-card', soup, '🍲']);
+        if (meal === '午' && cold) cards.push(['dish-card', cold, '🥗']);
+        cards.forEach(function (item) {
           var cls = item[0],
             r = item[1],
             icon = item[2];
@@ -2030,7 +2380,7 @@
         if (!detail || !toggle) return;
         if (detail.classList.contains('hidden')) {
           var state = mealState[meal];
-          if (!detail.innerHTML.trim()) renderDetail(meal, state.staple, state.dish);
+          if (!detail.innerHTML.trim()) renderDetail(meal, state.staple, state.dish, state.cold, state.soup);
           detail.classList.remove('hidden');
           toggle.textContent = '▴ 收起做法';
         } else {
@@ -2041,18 +2391,38 @@
 
       function swapMeal(meal, type) {
         var state = mealState[meal];
-        var avail = filterForMeal(type === 'staple' ? staples : dishes, meal);
-        var history = type === 'staple' ? state.stapleHistory : state.dishHistory;
-        var todayIdx = type === 'staple' ? state.stapleIdx : state.dishIdx;
-        var otherRecipe = type === 'staple' ? state.dish : state.staple;
+        var pool, history, todayIdx, otherRecipe;
+        if (type === 'staple') {
+          pool = staples;
+          history = state.stapleHistory;
+          todayIdx = state.stapleIdx;
+          otherRecipe = state.dish; // 主食与热菜避开食材冲突 + 水配水
+        } else if (type === 'cold') {
+          pool = coldDishes;
+          history = state.coldHistory;
+          todayIdx = state.coldIdx;
+          otherRecipe = null; // 凉菜独立，不做冲突检查
+        } else if (type === 'soup') {
+          pool = soups;
+          history = state.soupHistory;
+          todayIdx = state.soupIdx;
+          otherRecipe = state.staple; // 汤与主食避开水配水（粥+汤）
+        } else {
+          pool = dishes;
+          history = state.dishHistory;
+          todayIdx = state.dishIdx;
+          otherRecipe = state.staple; // 热菜与主食避开食材冲突 + 水配水
+        }
+        var avail = filterForMeal(pool, meal);
         var result = trySwap(avail, history, todayIdx, otherRecipe);
 
         if (!result) {
           var row = document.querySelector('.meal-row[data-meal="' + meal + '"]');
           if (row) {
+            var keyword = type === 'staple' ? '主食' : type === 'cold' ? '凉菜' : type === 'soup' ? '换汤' : meal === '午' ? '热菜' : '菜品';
             var btns = row.querySelectorAll('.btn-meal-swap');
             for (var b = 0; b < btns.length; b++) {
-              if (btns[b].textContent.indexOf(type === 'staple' ? '主食' : '菜品') !== -1) {
+              if (btns[b].textContent.indexOf(keyword) !== -1) {
                 btns[b].disabled = true;
                 btns[b].textContent = '仅此一道';
               }
@@ -2065,13 +2435,19 @@
         if (type === 'staple') {
           state.stapleIdx = result.idx;
           state.staple = result.recipe;
+        } else if (type === 'cold') {
+          state.coldIdx = result.idx;
+          state.cold = result.recipe;
+        } else if (type === 'soup') {
+          state.soupIdx = result.idx;
+          state.soup = result.recipe;
         } else {
           state.dishIdx = result.idx;
           state.dish = result.recipe;
         }
-        renderCompact(meal, state.staple, state.dish);
+        renderCompact(meal, state.staple, state.dish, state.cold, state.soup);
         var detail = document.getElementById('detail-' + meal);
-        if (detail && !detail.classList.contains('hidden')) renderDetail(meal, state.staple, state.dish);
+        if (detail && !detail.classList.contains('hidden')) renderDetail(meal, state.staple, state.dish, state.cold, state.soup);
       }
 
       function hasReminder() {
@@ -2092,18 +2468,45 @@
       function sizeReminders() {
         var items = document.querySelectorAll('.reminder-item');
         for (var i = 0; i < items.length; i++) {
-          var item = items[i];
-          var text = item.textContent.trim();
-          if (!text) continue;
-          var charW = 0;
-          for (var j = 0; j < text.length; j++) {
-            charW += text.charCodeAt(j) > 127 ? 1 : 0.5;
-          }
-          var w = item.clientWidth;
-          if (!w) continue;
-          var size = Math.floor(w / charW * 0.88);
-          item.style.fontSize = Math.max(28, Math.min(size, 110)) + 'px';
+          fitText(items[i]);
         }
+      }
+
+      // 二分搜索使文字在元素内尽可能大，同时不溢出宽度和高度。
+      // 用离屏 span 测量真实换行后占用，避免 flex 容器干扰 scroll 尺寸。
+      function fitText(item) {
+        var text = item.textContent.trim();
+        if (!text) return;
+        var cs = getComputedStyle(item);
+        var padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+        var padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+        var maxW = item.clientWidth - padX;
+        var maxH = item.clientHeight - padY;
+        if (maxW <= 0 || maxH <= 0) return;
+
+        var probe = document.createElement('div');
+        probe.textContent = text;
+        probe.style.cssText =
+          'position:absolute;visibility:hidden;left:-9999px;top:0;' +
+          'box-sizing:border-box;font-weight:' + cs.fontWeight + ';' +
+          'line-height:1.15;' +
+          'overflow-wrap:break-word;word-break:break-word;' +
+          'width:' + maxW + 'px;';
+        document.body.appendChild(probe);
+
+        var lo = 12, hi = 400, best = lo;
+        while (lo <= hi) {
+          var mid = (lo + hi) >> 1;
+          probe.style.fontSize = mid + 'px';
+          if (probe.scrollWidth <= maxW + 1 && probe.scrollHeight <= maxH + 1) {
+            best = mid;
+            lo = mid + 1;
+          } else {
+            hi = mid - 1;
+          }
+        }
+        document.body.removeChild(probe);
+        item.style.fontSize = best + 'px';
       }
 
       function init() {
@@ -2122,7 +2525,17 @@
           var meal = meals[m];
           var availStaples = filterForMeal(staples, meal);
           var availDishes = filterForMeal(dishes, meal);
-          var sIdx = getTodayIndex(availStaples);
+          var sIdx;
+          // 淮安人午饭吃米饭：午餐默认优先米饭/软饭，不要粥糊糕点
+          if (meal === '午') {
+            var riceIdx = [];
+            for (var si = 0; si < availStaples.length; si++) {
+              if (/饭/.test(availStaples[si].name)) riceIdx.push(si);
+            }
+            sIdx = riceIdx.length ? riceIdx[getTodayIndex(riceIdx)] : getTodayIndex(availStaples);
+          } else {
+            sIdx = getTodayIndex(availStaples);
+          }
           var dIdx = getTodayIndex(availDishes);
           var pair = findCompatiblePair(availStaples, availDishes, sIdx, dIdx);
           var state = mealState[meal];
@@ -2132,7 +2545,33 @@
           state.dishIdx = pair.dIdx;
           state.stapleHistory = [pair.sIdx];
           state.dishHistory = [pair.dIdx];
-          renderCompact(meal, pair.staple, pair.dish);
+          // 午餐额外排一道热汤、一道凉菜
+          if (meal === '午') {
+            var availSoup = filterForMeal(soups, meal);
+            if (availSoup.length) {
+              var soupIdx = getTodayIndex(availSoup);
+              // 汤别和主食撞食材（午餐主食是米饭，一般不冲突，保险起见检查一下）
+              if (hasConflict(availSoup[soupIdx], pair.staple)) {
+                for (var sp = 0; sp < availSoup.length; sp++) {
+                  if (!hasConflict(availSoup[sp], pair.staple)) {
+                    soupIdx = sp;
+                    break;
+                  }
+                }
+              }
+              state.soup = availSoup[soupIdx];
+              state.soupIdx = soupIdx;
+              state.soupHistory = [soupIdx];
+            }
+            var availCold = filterForMeal(coldDishes, meal);
+            if (availCold.length) {
+              var cIdx = getTodayIndex(availCold);
+              state.cold = availCold[cIdx];
+              state.coldIdx = cIdx;
+              state.coldHistory = [cIdx];
+            }
+          }
+          renderCompact(meal, pair.staple, pair.dish, state.cold, state.soup);
 
           var row = document.querySelector('.meal-row[data-meal="' + meal + '"]');
           if (row) {
